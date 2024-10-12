@@ -1,5 +1,7 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
+using Unity.Burst.CompilerServices;
 using UnityEngine;
 
 public class DrawManager : MonoBehaviour
@@ -13,6 +15,8 @@ public class DrawManager : MonoBehaviour
     [SerializeField] private ChalkManager _redChalkManager;
     private ChalkManager _chalkManager;
     private Line _linePrefab;
+    public GameObject eraser;
+    private GameObject eraserInstance;
 
 
     public const float RESOLUTION = .04f;
@@ -31,15 +35,15 @@ public class DrawManager : MonoBehaviour
     void Update()
     {
         Vector2 mousePos = _cam.ScreenToWorldPoint(Input.mousePosition);
-        
+        bool canDraw = drawZoneCheck();
 
-        if(Input.GetMouseButtonDown(0))
+        if(Input.GetMouseButtonDown(0) && canDraw)
         {
             _currentLine = Instantiate(_linePrefab, mousePos, Quaternion.identity, _parent.transform);
             _currentLine.SetPosition(mousePos);
         }
 
-        if(Input.GetMouseButton(0))
+        if (Input.GetMouseButton(0))
         {
             Vector2 nextPos = Vector2.MoveTowards(prevMousePos, mousePos, RESOLUTION);
 
@@ -51,13 +55,14 @@ public class DrawManager : MonoBehaviour
 
             while (_currentLine != null && _currentLine.CanAppend(mousePos) && _chalkManager.chalkAmount > 0)
             {
-                _chalkManager.ReduceChalk(amountChalkUsed);
-                if(_chalkManager.isEmpty())
+
+                if (_chalkManager.isEmpty() || !canDraw)
                 {
                     _currentLine.destroy();
                     break;
                 }
 
+                _chalkManager.ReduceChalk(amountChalkUsed);
                 if (_currentLine.SetPosition(nextPos))
                 {
                     _currentLine = Instantiate(_linePrefab, nextPos, Quaternion.identity, _parent.transform);
@@ -66,6 +71,10 @@ public class DrawManager : MonoBehaviour
                 nextPos = Vector2.MoveTowards(nextPos, mousePos, RESOLUTION);
             }
         }
+        else if (Input.GetMouseButtonDown(1))
+        {
+            eraserInstance = Instantiate(eraser, mousePos, Quaternion.identity);
+        }
 
         if(Input.GetMouseButtonUp(0))
         {
@@ -73,6 +82,10 @@ public class DrawManager : MonoBehaviour
             {
                 _currentLine.destroy();
             }
+        }
+        else if (Input.GetMouseButtonUp(1))
+        {
+            Destroy(eraserInstance);
         }
 
         if(Input.GetKeyDown("1"))
@@ -98,6 +111,26 @@ public class DrawManager : MonoBehaviour
             }
         }
 
+        
+
         prevMousePos = mousePos;
+    }
+
+    private bool drawZoneCheck()
+    {
+        Ray ray = _cam.ScreenPointToRay(Input.mousePosition);
+        RaycastHit2D hit = Physics2D.GetRayIntersection(ray);
+
+
+        if (hit)
+        {
+            if (hit.collider.tag == "NoDraw")
+            {
+                return false;
+            }
+        }
+        
+
+        return true;
     }
 }

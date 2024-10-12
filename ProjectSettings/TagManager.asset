@@ -6,6 +6,8 @@ TagManager:
   tags:
   - Red
   - White
+  - NoDraw
+  - Eraser
   layers:
   - Default
   - TransparentFX
