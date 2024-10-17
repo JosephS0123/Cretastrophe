@@ -20,9 +20,10 @@ public class LineCollider : MonoBehaviour
 
     private void OnTriggerEnter2D(Collider2D collision)
     {
-        // Destroy the item after it's collision triggered
-        Destroy(_collider);
-        Destroy(_renderer);
-        Destroy(_line);
+        // Destroy the item after its collision triggered
+        if (collision.gameObject.tag == "Eraser")
+        {
+            Destroy(_line);
+        }
     }
 }

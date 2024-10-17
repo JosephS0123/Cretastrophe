@@ -22,10 +22,8 @@ public class RedLineCollider : MonoBehaviour
     {
         // Destroy the item after it's collision triggered
         
-        if(collision.gameObject.tag == "Blue") 
+        if(collision.gameObject.tag == "Eraser") 
         {
-            Destroy(_collider);
-            Destroy(_renderer);
             Destroy(_line);
         }
 

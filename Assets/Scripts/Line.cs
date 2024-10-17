@@ -4,8 +4,10 @@ using UnityEngine;
 
 public class Line : MonoBehaviour
 {
+    
+    
     [SerializeField] private LineRenderer _renderer;
-    [SerializeField] private EdgeCollider2D _collider;
+    [SerializeField] private PolygonCollider2D _collider;
 
     private readonly List<Vector2> _points = new List<Vector2>();
     void Start()
@@ -27,11 +29,41 @@ public class Line : MonoBehaviour
         _renderer.positionCount++;
         _renderer.SetPosition(_renderer.positionCount - 1, pos);
 
-        _collider.points = _points.ToArray();
+        //_collider.points = _points.ToArray();
 
         if(_renderer.positionCount > 1)
         {
+            //List<Vector2> verts = new List<Vector2>();
+            //verts.Add(_points[0]);
+
+            Mesh mesh = new Mesh();
+            _renderer.BakeMesh(mesh, true);
+            //var boundary = EdgeHelpers.GetEdges(mesh.triangles).FindBoundary().SortEdges();
+            
+            //print(boundary.Count);
+
+            List<Vector2> verts = new List<Vector2>();
+
+            
+            foreach (Vector2 vertex in mesh.vertices)
+            {
+                //verts.Add(mesh.vertices[edge.v1]);
+                
+                if(!verts.Contains(vertex))
+                {  
+                    verts.Add(vertex);
+                }
+                
+            }
+
+            verts = ConvexHull.compute(verts);
+
+            _collider.points = verts.ToArray();
+            
+
+
             return true;
+
         }
         return false;
     }
@@ -54,6 +86,15 @@ public class Line : MonoBehaviour
     public void destroy()
     {
         Destroy(gameObject);
+    }
+
+    private void OnTriggerEnter2D(Collider2D collision)
+    {
+        // Destroy the item after its collision triggered
+        if (collision.gameObject.tag == "Eraser")
+        {
+            destroy();
+        }
     }
 
 }
