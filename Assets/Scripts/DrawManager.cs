@@ -19,7 +19,7 @@ public class DrawManager : MonoBehaviour
     private GameObject eraserInstance;
 
 
-    public const float RESOLUTION = .04f;
+    public const float RESOLUTION = .2f;
     public const float amountChalkUsed = .1f;
 
     private Line _currentLine;
@@ -47,7 +47,7 @@ public class DrawManager : MonoBehaviour
         {
             Vector2 nextPos = Vector2.MoveTowards(prevMousePos, mousePos, RESOLUTION);
 
-            if (_currentLine == null && !_chalkManager.isEmpty())
+            if (_currentLine == null && !_chalkManager.isEmpty() && canDraw)
             {
                 _currentLine = Instantiate(_linePrefab, mousePos, Quaternion.identity, _parent.transform);
                 _currentLine.SetPosition(mousePos);
@@ -124,7 +124,7 @@ public class DrawManager : MonoBehaviour
 
         if (hit)
         {
-            if (hit.collider.tag == "NoDraw")
+            if (hit.collider.tag == "NoDraw" || hit.collider.tag == "Player")
             {
                 return false;
             }

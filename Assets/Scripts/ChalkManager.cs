@@ -19,10 +19,7 @@ public class ChalkManager : MonoBehaviour
     }
     void Update()
     {
-        if (Input.GetKeyDown(KeyCode.Space))
-        {
-            ReduceChalk(10);
-        }
+        
     }
     public void ReduceChalk(float reduce)
     {
