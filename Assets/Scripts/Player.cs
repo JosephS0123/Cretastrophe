@@ -5,14 +5,24 @@ using UnityEngine;
 [RequireComponent(typeof(Controller2D))]
 public class Player : MonoBehaviour
 {
-    public float jumpHeight = 4;
-    public float timeToJumpApex = .4f;
+    //public float jumpHeight = 4;
+    //public float timeToJumpApex = .4f;
+    
+    public float gravity = -25;
+
     float accelerationTimeAirborne = .1f;
     float accelerationTimeGrounded = .05f;
     float moveSpeed = 6;
 
-    float gravity;
-    float jumpVelocity;
+    float baseVelocity = 6;
+    float holdAcceleration = 25;
+    float holdAccelerationFalloff = 30;
+    float holdDuration = 0.30f;
+    float jumpTimeElapsed;
+    float curHoldAcceleration;
+    bool jumping = false;
+
+    //float jumpVelocity;
     Vector2 velocity;
     float velocityXSmoothing;
 
@@ -22,12 +32,14 @@ public class Player : MonoBehaviour
     {
         controller = GetComponent<Controller2D>();
 
-        gravity = -(2 * jumpHeight) / Mathf.Pow(timeToJumpApex, 2);
-        jumpVelocity = Mathf.Abs(gravity) * timeToJumpApex;
+        //gravity = -(2 * jumpHeight) / Mathf.Pow(timeToJumpApex, 2);
+        //jumpVelocity = Mathf.Abs(gravity) * timeToJumpApex;
+        jumpTimeElapsed = 0;
     }
 
     void Update()
     {
+        
         if (controller.collisions.above || controller.collisions.below) 
         {
             velocity.y = 0;
@@ -37,7 +49,22 @@ public class Player : MonoBehaviour
 
         if (Input.GetKeyDown(KeyCode.Space) && controller.collisions.below)
         {
-            velocity.y = jumpVelocity;
+            velocity.y = baseVelocity;
+            jumpTimeElapsed = 0;
+            jumping = true;
+            curHoldAcceleration = holdAcceleration;
+        }
+
+        if(Input.GetKey(KeyCode.Space) && jumpTimeElapsed < holdDuration && jumping)
+        {
+            velocity.y += curHoldAcceleration * Time.deltaTime;
+            curHoldAcceleration -= holdAccelerationFalloff * Time.deltaTime;
+            jumpTimeElapsed += Time.deltaTime;
+        }
+
+        if(Input.GetKeyUp(KeyCode.Space))
+        {
+            jumping = false;
         }
 
         float targetVelocityX = input.x * moveSpeed;
