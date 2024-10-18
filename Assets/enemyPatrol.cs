@@ -1,6 +1,8 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.SceneManagement;
+
 
 public class EnemyTest : MonoBehaviour
 {
@@ -10,10 +12,12 @@ public class EnemyTest : MonoBehaviour
     private bool moveRight = true; //Enemy starts out by moving right.
     public Transform Detector; //This will detect if there is ground in front of the enemy or not.
     public Collider2D enemyCollider;  // Reference to the enemy's collider
+    public Collider2D playerDetect; //Ref to killPlayer collider
 
     void Start()
     {
         enemyCollider = GetComponent<Collider2D>();
+        playerDetect = GetComponent<Collider2D>();
     }
 
     // Update is called once per frame
@@ -41,8 +45,16 @@ public class EnemyTest : MonoBehaviour
         Debug.DrawRay(Detector.position, Vector2.down * rayDistGround, Color.green);
 
         // If the frontCheck detects something, ensure it's not the enemy's own collider
-        if (!groundCheck.collider || (frontCheck.collider && frontCheck.collider != enemyCollider))
+        if (!groundCheck.collider || (frontCheck.collider && frontCheck.collider != enemyCollider && frontCheck.collider != playerDetect))
         {
+
+            // Check if the frontCheck hits player
+            if (frontCheck.collider && frontCheck.collider.CompareTag("Player"))
+            {
+            // KILL muahaha
+                SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
+            }
+
             if (moveRight)
             {
                 transform.eulerAngles = new Vector3(0, -180, 0);
@@ -55,4 +67,14 @@ public class EnemyTest : MonoBehaviour
             }
         }
     }
+
+    private void OnTriggerEnter2D(Collider2D other)
+    {
+        Debug.Log("work pls");
+        if(other.gameObject.CompareTag("Player"))
+        {
+            SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
+        }
+    }
+
 }
