@@ -23,6 +23,7 @@ public class door_Lock : MonoBehaviour
             {
                 // Unlock the door 
                 doorCollider.enabled = false;
+                this.gameObject.SetActive(false);
                 AudioSource.PlayClipAtPoint(soundEffect, transform.position);
 
                 //Remove key

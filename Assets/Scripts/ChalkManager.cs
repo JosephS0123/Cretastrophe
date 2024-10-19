@@ -13,7 +13,6 @@ public class ChalkManager : MonoBehaviour
     void Start()
     {
         chalkAmount = maxChalk;
-        regenOn = true;
         StartCoroutine(HealingLoop());
 
     }
