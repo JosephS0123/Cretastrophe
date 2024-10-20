@@ -3,6 +3,7 @@ using UnityEngine.SceneManagement; // Include SceneManagement namespace
 
 public class TriggerSceneChange : MonoBehaviour
 {
+    /*
     // Name of the scene you want to load
     public string sceneName;
 
@@ -15,5 +16,5 @@ public class TriggerSceneChange : MonoBehaviour
             // Load the specified scene
             SceneManager.LoadScene(sceneName);
         }
-    }
+    }*/
 }

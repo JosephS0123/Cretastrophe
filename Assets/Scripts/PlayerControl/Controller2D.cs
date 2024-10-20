@@ -17,7 +17,7 @@ public class Controller2D : MonoBehaviour
     float verticalRaySpacing;
 
     new BoxCollider2D collider;
-    CapsuleCollider2D colliderTest;
+    //CapsuleCollider2D colliderTest;
     float radius;
     RaycastOrigins raycastOrigins;
     public CollisionInfo collisions;
@@ -25,8 +25,8 @@ public class Controller2D : MonoBehaviour
     void Start()
     {
         collider = GetComponent<BoxCollider2D>();
-        colliderTest = GetComponent<CapsuleCollider2D>();
-        radius = 0.5f * Mathf.Min(colliderTest.size.x, colliderTest.size.y);
+        //colliderTest = GetComponent<CapsuleCollider2D>();
+        //radius = 0.5f * Mathf.Min(colliderTest.size.x, colliderTest.size.y);
         CalculateRaySpacing();
     }
 
