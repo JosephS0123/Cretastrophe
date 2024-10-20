@@ -4521,7 +4521,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 89dec7588a26834489c37bc178be8569, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  drawSound: {fileID: 8300000, guid: 352d3b91e453ce14b9c191e1338186a6, type: 3}
+  drawSound: {fileID: 8300000, guid: 25399b5fadb31814884ed1cabf48be97, type: 3}
 --- !u!4 &636333025 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 2251127861668341907, guid: b21a856799e98aa4f9297b9163c2581e, type: 3}
