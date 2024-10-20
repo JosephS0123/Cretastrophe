@@ -20,6 +20,13 @@ public class Player : MonoBehaviour
     float holdDuration = 0.30f;
     float jumpTimeElapsed;
     float curHoldAcceleration;
+
+    float coyoteTimePre;
+    float coyoteTimePost;
+    float coyoteDuration = .1f;
+
+    bool coyoteCheckPre = false;
+    bool coyoteCheckPost = false;
     bool jumping = false;
 
     //float jumpVelocity;
@@ -50,19 +57,87 @@ public class Player : MonoBehaviour
         
         Vector2 input = new Vector2(Input.GetAxisRaw("Horizontal"), Input.GetAxisRaw("Vertical"));
 
-        if (Input.GetKeyDown(KeyCode.Space) && controller.collisions.below)
+        
+        if(controller.collisions.below && !coyoteCheckPost && !jumping)
         {
-            velocity.y = baseVelocity;
-            jumpTimeElapsed = 0;
-            jumping = true;
-            curHoldAcceleration = holdAcceleration;
+            coyoteTimePre = 0;
+            coyoteCheckPre = true;
+        }
+        else
+        {
+            if (coyoteCheckPre)
+            {
+                if (coyoteTimePre < coyoteDuration)
+                {
+                    coyoteTimePre += Time.deltaTime;
+                }
+                else
+                {
+                    coyoteCheckPre = false;
+                }
+            }
+
+        }
+        
+        if (Input.GetKeyDown(KeyCode.Space))
+        {
+            if (!coyoteCheckPre)
+            {
+                if (controller.collisions.below)
+                {
+                    velocity.y = baseVelocity;
+                    jumpTimeElapsed = 0;
+                    jumping = true;
+                    curHoldAcceleration = holdAcceleration;
+                    coyoteCheckPost = false;
+                }
+                else
+                {
+                    coyoteTimePost = 0;
+                    coyoteCheckPost = true;
+                }
+            }
+            else
+            {
+                velocity.y = baseVelocity;
+                jumpTimeElapsed = 0;
+                jumping = true;
+                curHoldAcceleration = holdAcceleration;
+                coyoteCheckPre = false;
+            
+            }
         }
 
-        if(Input.GetKey(KeyCode.Space) && jumpTimeElapsed < holdDuration && jumping)
+        if(Input.GetKey(KeyCode.Space))
         {
-            velocity.y += curHoldAcceleration * Time.deltaTime;
-            curHoldAcceleration -= holdAccelerationFalloff * Time.deltaTime;
-            jumpTimeElapsed += Time.deltaTime;
+            if (jumpTimeElapsed < holdDuration && jumping)
+            {
+                velocity.y += curHoldAcceleration * Time.deltaTime;
+                curHoldAcceleration -= holdAccelerationFalloff * Time.deltaTime;
+                jumpTimeElapsed += Time.deltaTime;
+            }
+            else if(coyoteCheckPost)
+            {
+                if (coyoteTimePost < coyoteDuration)
+                {
+                    if (controller.collisions.below)
+                    {
+                        velocity.y = baseVelocity;
+                        jumpTimeElapsed = 0;
+                        jumping = true;
+                        curHoldAcceleration = holdAcceleration;
+                        coyoteCheckPost = false;
+                    }
+                    else
+                    {
+                        coyoteTimePost += Time.deltaTime;
+                    }
+                }
+                else
+                {
+                    coyoteCheckPost = false;
+                }
+            }
         }
 
         if(Input.GetKeyUp(KeyCode.Space))
