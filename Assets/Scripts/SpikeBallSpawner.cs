@@ -9,8 +9,9 @@ public class SpikeBallSpawner : MonoBehaviour
     void Start()
     {
         Vector3 spawnPos = transform.position;
+        spawnPos.y -= .2f;
         
-        spikeBallInstance = Instantiate(spikeBall, transform.position, Quaternion.identity, this.transform);
+        spikeBallInstance = Instantiate(spikeBall, spawnPos, Quaternion.identity, this.transform);
         spikeBallInstance.spikeBallSpawner = this;
     }
 

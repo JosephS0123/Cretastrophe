@@ -9,6 +9,7 @@ TagManager:
   - NoDraw
   - Eraser
   - BallDespawn
+  - PhysicsObj
   layers:
   - Default
   - TransparentFX
