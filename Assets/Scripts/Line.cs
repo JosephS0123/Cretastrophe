@@ -8,6 +8,7 @@ public class Line : MonoBehaviour
     
     [SerializeField] private LineRenderer _renderer;
     [SerializeField] private PolygonCollider2D _collider;
+    public ChalkManager _chalkManager = null;
 
     private readonly List<Vector2> _points = new List<Vector2>();
     void Start()
@@ -93,7 +94,8 @@ public class Line : MonoBehaviour
         // Destroy the item after its collision triggered
         if (collision.gameObject.tag == "Eraser")
         {
-            destroy();
+            _chalkManager.ReplenishChalk(.1f);
+            Destroy(gameObject);
         }
     }
 

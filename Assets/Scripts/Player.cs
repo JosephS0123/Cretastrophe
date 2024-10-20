@@ -16,7 +16,7 @@ public class Player : MonoBehaviour
 
     float baseVelocity = 6;
     float holdAcceleration = 25;
-    float holdAccelerationFalloff = 30;
+    float holdAccelerationFalloff = 35;
     float holdDuration = 0.30f;
     float jumpTimeElapsed;
     float curHoldAcceleration;
@@ -42,7 +42,10 @@ public class Player : MonoBehaviour
         
         if (controller.collisions.above || controller.collisions.below) 
         {
-            velocity.y = 0;
+            if (!controller.collisions.slidingDownMaxSlope)
+            {
+                velocity.y = 0;
+            }
         }
         
         Vector2 input = new Vector2(Input.GetAxisRaw("Horizontal"), Input.GetAxisRaw("Vertical"));

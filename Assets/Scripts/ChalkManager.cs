@@ -6,9 +6,9 @@ public class ChalkManager : MonoBehaviour
 {
     [SerializeField] private Image chalkBar;
     [SerializeField] public float chalkAmount;
-    [SerializeField] private float maxChalk = 100f;
+    [SerializeField] private float maxChalk = 20f;
     [SerializeField] private bool regenOn;
-    private float regenAmount = .5f;
+    private int regenAmount = 5;
 
     void Start()
     {

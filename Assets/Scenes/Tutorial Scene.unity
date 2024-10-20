@@ -1758,6 +1758,7 @@ GameObject:
   - component: {fileID: 235513720}
   - component: {fileID: 235513719}
   - component: {fileID: 235513722}
+  - component: {fileID: 235513723}
   m_Layer: 8
   m_Name: Player
   m_TagString: Player
@@ -1894,7 +1895,7 @@ BoxCollider2D:
   m_IsTrigger: 1
   m_UsedByEffector: 0
   m_UsedByComposite: 0
-  m_Offset: {x: -0.01223135, y: 0.0047049522}
+  m_Offset: {x: 0.0005607605, y: 0.01188454}
   m_SpriteTilingProperty:
     border: {x: 0, y: 0, z: 0, w: 0}
     pivot: {x: 0.5, y: 0.5}
@@ -1905,7 +1906,7 @@ BoxCollider2D:
     adaptiveTiling: 0
   m_AutoTiling: 0
   serializedVersion: 2
-  m_Size: {x: 0.48240185, y: 0.68387854}
+  m_Size: {x: 0.3663473, y: 0.57668895}
   m_EdgeRadius: 0
 --- !u!50 &235513722
 Rigidbody2D:
@@ -1934,6 +1935,41 @@ Rigidbody2D:
   m_SleepingMode: 1
   m_CollisionDetection: 0
   m_Constraints: 0
+--- !u!70 &235513723
+CapsuleCollider2D:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 235513714}
+  m_Enabled: 1
+  m_Density: 1
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_ForceSendLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_ForceReceiveLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_ContactCaptureLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_CallbackLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_IsTrigger: 1
+  m_UsedByEffector: 0
+  m_UsedByComposite: 0
+  m_Offset: {x: 0.0024199486, y: 0.0120995045}
+  m_Size: {x: 0.36735916, y: 0.57385623}
+  m_Direction: 0
 --- !u!1 &238322729
 GameObject:
   m_ObjectHideFlags: 3
@@ -4063,54 +4099,6 @@ Transform:
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 568097640}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!1 &617598601
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 617598603}
-  - component: {fileID: 617598602}
-  m_Layer: 0
-  m_Name: WhiteChalkManager
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!114 &617598602
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 617598601}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 36955a0556248cc4d93076e3a4d4b520, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  chalkBar: {fileID: 390177550}
-  chalkAmount: 20
-  maxChalk: 20
-  regenOn: 0
---- !u!4 &617598603
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 617598601}
-  serializedVersion: 2
-  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 556.5532, y: 287.69952, z: 4.8188524}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 1340376738}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1001 &617975678
 PrefabInstance:
@@ -7728,6 +7716,8 @@ GameObject:
   m_Component:
   - component: {fileID: 1340376738}
   - component: {fileID: 1340376737}
+  - component: {fileID: 1340376740}
+  - component: {fileID: 1340376739}
   m_Layer: 0
   m_Name: DrawManager
   m_TagString: Untagged
@@ -7750,8 +7740,8 @@ MonoBehaviour:
   _whiteLinePrefab: {fileID: 1395744041871155548, guid: c3002433d121ff84fac289e02e702fdf, type: 3}
   _redLinePrefab: {fileID: 1395744041871155548, guid: b644ad18aa2bdd5499d03a1fa31ec2ef, type: 3}
   _parent: {fileID: 1531033290}
-  _whiteChalkManager: {fileID: 617598602}
-  _redChalkManager: {fileID: 1831374285}
+  _whiteChalkManager: {fileID: 1340376740}
+  _redChalkManager: {fileID: 1340376739}
   eraser: {fileID: 9036070968856672644, guid: 00acba2eab2562b42af6067e2d5c6ae4, type: 3}
 --- !u!4 &1340376738
 Transform:
@@ -7765,11 +7755,41 @@ Transform:
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
-  m_Children:
-  - {fileID: 617598603}
-  - {fileID: 1831374286}
+  m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1340376739
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1340376736}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 36955a0556248cc4d93076e3a4d4b520, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  chalkBar: {fileID: 2116912655}
+  chalkAmount: 100
+  maxChalk: 100
+  regenOn: 0
+--- !u!114 &1340376740
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1340376736}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 36955a0556248cc4d93076e3a4d4b520, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  chalkBar: {fileID: 390177550}
+  chalkAmount: 20
+  maxChalk: 20
+  regenOn: 0
 --- !u!1001 &1340398465
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -9853,54 +9873,6 @@ PrefabInstance:
     m_AddedGameObjects: []
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: b21a856799e98aa4f9297b9163c2581e, type: 3}
---- !u!1 &1831374284
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 1831374286}
-  - component: {fileID: 1831374285}
-  m_Layer: 0
-  m_Name: RedChalkManager
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!114 &1831374285
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1831374284}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 36955a0556248cc4d93076e3a4d4b520, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  chalkBar: {fileID: 2116912655}
-  chalkAmount: 100
-  maxChalk: 100
-  regenOn: 0
---- !u!4 &1831374286
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1831374284}
-  serializedVersion: 2
-  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 556.5532, y: 287.69952, z: 4.8188524}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 1340376738}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1001 &1840467655
 PrefabInstance:
   m_ObjectHideFlags: 0

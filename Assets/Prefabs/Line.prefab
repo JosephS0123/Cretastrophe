@@ -98,8 +98,8 @@ LineRenderer:
       serializedVersion: 2
       m_Curve:
       - serializedVersion: 3
-        time: 0.019950867
-        value: 0.20590591
+        time: 0.0076065063
+        value: 0.21141434
         inSlope: 0
         outSlope: 0
         tangentMode: 0
@@ -139,8 +139,8 @@ LineRenderer:
       m_ColorSpace: -1
       m_NumColorKeys: 2
       m_NumAlphaKeys: 2
-    numCornerVertices: 3
-    numCapVertices: 3
+    numCornerVertices: 6
+    numCapVertices: 6
     alignment: 0
     textureMode: 1
     textureScale: {x: 1, y: 1}
@@ -194,9 +194,5 @@ PolygonCollider2D:
   m_AutoTiling: 0
   m_Points:
     m_Paths:
-    - - {x: 0, y: 1}
-      - {x: -0.95105654, y: 0.30901697}
-      - {x: -0.5877852, y: -0.80901706}
-      - {x: 0.58778536, y: -0.80901694}
-      - {x: 0.9510565, y: 0.30901712}
+    - []
   m_UseDelaunayMesh: 0

@@ -40,6 +40,7 @@ public class DrawManager : MonoBehaviour
         if(Input.GetMouseButtonDown(0) && canDraw)
         {
             _currentLine = Instantiate(_linePrefab, mousePos, Quaternion.identity, _parent.transform);
+            _currentLine._chalkManager = _chalkManager;
             _currentLine.SetPosition(mousePos);
         }
 
@@ -50,6 +51,7 @@ public class DrawManager : MonoBehaviour
             if (_currentLine == null && !_chalkManager.isEmpty() && canDraw)
             {
                 _currentLine = Instantiate(_linePrefab, mousePos, Quaternion.identity, _parent.transform);
+                _currentLine._chalkManager = _chalkManager;
                 _currentLine.SetPosition(mousePos);
             }
 
@@ -62,10 +64,11 @@ public class DrawManager : MonoBehaviour
                     break;
                 }
 
-                _chalkManager.ReduceChalk(amountChalkUsed);
                 if (_currentLine.SetPosition(nextPos))
                 {
+                    _chalkManager.ReduceChalk(amountChalkUsed);
                     _currentLine = Instantiate(_linePrefab, nextPos, Quaternion.identity, _parent.transform);
+                    _currentLine._chalkManager = _chalkManager;
                     _currentLine.SetPosition(nextPos);
                 }
                 nextPos = Vector2.MoveTowards(nextPos, mousePos, RESOLUTION);
@@ -96,6 +99,7 @@ public class DrawManager : MonoBehaviour
             {
                 _currentLine.destroy();
                 _currentLine = Instantiate(_linePrefab, mousePos, Quaternion.identity, _parent.transform);
+                _currentLine._chalkManager = _chalkManager;
                 _currentLine.SetPosition(mousePos);
             }
         }
@@ -107,6 +111,7 @@ public class DrawManager : MonoBehaviour
             {
                 _currentLine.destroy();
                 _currentLine = Instantiate(_linePrefab, mousePos, Quaternion.identity, _parent.transform);
+                _currentLine._chalkManager = _chalkManager;
                 _currentLine.SetPosition(mousePos);
             }
         }
