@@ -19,6 +19,7 @@ public class DrawManager : MonoBehaviour
     private GameObject eraserInstance;
 
 
+    public LayerMask noDrawMask;
     public const float RESOLUTION = .1f;
     public const float amountChalkUsed = .1f;
 
@@ -124,18 +125,24 @@ public class DrawManager : MonoBehaviour
     private bool drawZoneCheck()
     {
         Ray ray = _cam.ScreenPointToRay(Input.mousePosition);
-        RaycastHit2D hit = Physics2D.GetRayIntersection(ray);
+        List<RaycastHit2D> results = new List<RaycastHit2D>();
+        RaycastHit2D[] hit = Physics2D.GetRayIntersectionAll(ray, Mathf.Infinity);
 
 
-        if (hit)
+
+        foreach (RaycastHit2D hit2D in hit)
         {
-            if (hit.collider.tag == "NoDraw" || hit.collider.tag == "Player")
+            if (hit2D)
             {
-                return false;
+                if (hit2D.collider.tag == "NoDraw" || hit2D.collider.tag == "Player")
+                {
+                    return false;
+                }
             }
-        }
-        
 
+
+            
+        }
         return true;
     }
 }
