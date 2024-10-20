@@ -8,6 +8,7 @@ TagManager:
   - White
   - NoDraw
   - Eraser
+  - BallDespawn
   layers:
   - Default
   - TransparentFX
@@ -19,7 +20,7 @@ TagManager:
   - 
   - Player
   - Obstacle
-  - 
+  - SpikeBallSpawner
   - 
   - 
   - 
@@ -48,6 +49,18 @@ TagManager:
   - name: Default
     uniqueID: 0
     locked: 0
+  - name: Chalk
+    uniqueID: 2569568791
+    locked: 0
+  - name: NoDrawZone
+    uniqueID: 493451525
+    locked: 0
   - name: Projectile
     uniqueID: 889724969
+    locked: 0
+  - name: Hazards
+    uniqueID: 2862756683
+    locked: 0
+  - name: Ground
+    uniqueID: 1024043353
     locked: 0

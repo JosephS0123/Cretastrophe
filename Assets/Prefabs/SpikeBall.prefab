@@ -13,7 +13,7 @@ GameObject:
   - component: {fileID: 623929888775266920}
   - component: {fileID: 1319138906598182322}
   m_Layer: 0
-  m_Name: Spike Ball
+  m_Name: SpikeBall
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -72,8 +72,8 @@ SpriteRenderer:
   m_AutoUVMaxDistance: 0.5
   m_AutoUVMaxAngle: 89
   m_LightmapParameters: {fileID: 0}
-  m_SortingLayerID: 0
-  m_SortingLayer: 0
+  m_SortingLayerID: -1432210613
+  m_SortingLayer: 4
   m_SortingOrder: 0
   m_Sprite: {fileID: 21300000, guid: d8a912417bcb83e40917dcc83d71405f, type: 3}
   m_Color: {r: 0.36442143, g: 0.521531, b: 0.5320754, a: 1}

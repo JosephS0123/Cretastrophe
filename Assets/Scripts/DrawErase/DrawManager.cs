@@ -19,7 +19,7 @@ public class DrawManager : MonoBehaviour
     private GameObject eraserInstance;
 
 
-    public const float RESOLUTION = .2f;
+    public const float RESOLUTION = .1f;
     public const float amountChalkUsed = .1f;
 
     private Line _currentLine;

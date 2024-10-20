@@ -12,7 +12,7 @@ GameObject:
   - component: {fileID: 6029896216678865724}
   - component: {fileID: 5916156073070578408}
   m_Layer: 0
-  m_Name: NoDrawZone
+  m_Name: BallDespawn
   m_TagString: NoDraw
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
