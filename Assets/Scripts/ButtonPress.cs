@@ -23,6 +23,8 @@ public class ButtonPress : MonoBehaviour
         {
             Destroy(door);
             Destroy(gameObject);
+            AudioSource.PlayClipAtPoint(drawSound, transform.position);
+
         }
     }
 }
