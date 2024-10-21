@@ -6,6 +6,10 @@ public class collectFlag : MonoBehaviour
 {
 
     public AudioClip drawSound; //Sound effect
+    public GameObject completeLevel;
+    public GameObject chalkUI;
+    public GameObject barUI;
+    public LevelComplete levelCompleteUI;
 
     // Start is called before the first frame update
     void Start()
@@ -30,6 +34,17 @@ public class collectFlag : MonoBehaviour
             // Destroy the item after it's collision triggered
             Destroy(gameObject);
             Debug.Log("Total Diamonds Count ingame: " + GameManager.maxDiamondCount);
+            if (levelCompleteUI != null)
+            {
+                levelCompleteUI.ShowLevelCompleteScreen();  // Update gems collected display
+            }
+             if (completeLevel != null)
+                {
+                    completeLevel.SetActive(true);  // Shows the UI
+                }
+            chalkUI.SetActive(false);
+            barUI.SetActive(false);
+
         }
         
     }
