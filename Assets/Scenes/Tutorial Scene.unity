@@ -9267,6 +9267,10 @@ PrefabInstance:
       propertyPath: door
       value: 
       objectReference: {fileID: 984554765}
+    - target: {fileID: 2662473853587782160, guid: 64cf00b118c5ccb45a4e2210d93c278d, type: 3}
+      propertyPath: drawSound
+      value: 
+      objectReference: {fileID: 8300000, guid: 25399b5fadb31814884ed1cabf48be97, type: 3}
     - target: {fileID: 6647188085299455152, guid: 64cf00b118c5ccb45a4e2210d93c278d, type: 3}
       propertyPath: m_Name
       value: Button

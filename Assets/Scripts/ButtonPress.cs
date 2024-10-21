@@ -6,6 +6,7 @@ using UnityEngine;
 public class ButtonPress : MonoBehaviour
 {
     public GameObject door;
+    public AudioClip drawSound; //Sound effect
     void Start()
     {
         
