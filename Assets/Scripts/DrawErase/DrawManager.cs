@@ -36,7 +36,7 @@ public class DrawManager : MonoBehaviour
     void Update()
     {
         Vector2 mousePos = _cam.ScreenToWorldPoint(Input.mousePosition);
-        bool canDraw = drawZoneCheck();
+        bool canDraw = drawZoneCheck(mousePos);
 
         if(Input.GetMouseButtonDown(0) && canDraw)
         {
@@ -58,21 +58,34 @@ public class DrawManager : MonoBehaviour
 
             while (_currentLine != null && _currentLine.CanAppend(mousePos) && _chalkManager.chalkAmount > 0)
             {
-
-                if (_chalkManager.isEmpty() || !canDraw)
+                canDraw = drawZoneCheck(nextPos);
+                if (_chalkManager.isEmpty())
                 {
                     _currentLine.destroy();
                     break;
                 }
 
-                if (_currentLine.SetPosition(nextPos))
+                if (!canDraw)
+                {
+                    nextPos = Vector2.MoveTowards(nextPos, mousePos, RESOLUTION);
+                    _currentLine.destroy();
+                    _currentLine = Instantiate(_linePrefab, nextPos, Quaternion.identity, _parent.transform);
+                    _currentLine._chalkManager = _chalkManager;
+                    _currentLine.SetPosition(nextPos);
+                }
+                else if (_currentLine.SetPosition(nextPos))
                 {
                     _chalkManager.ReduceChalk(amountChalkUsed);
                     _currentLine = Instantiate(_linePrefab, nextPos, Quaternion.identity, _parent.transform);
                     _currentLine._chalkManager = _chalkManager;
                     _currentLine.SetPosition(nextPos);
+                    nextPos = Vector2.MoveTowards(nextPos, mousePos, RESOLUTION);
                 }
-                nextPos = Vector2.MoveTowards(nextPos, mousePos, RESOLUTION);
+                else
+                {
+                    nextPos = Vector2.MoveTowards(nextPos, mousePos, RESOLUTION);
+                }
+                
             }
         }
         else if (Input.GetMouseButtonDown(1))
@@ -122,19 +135,17 @@ public class DrawManager : MonoBehaviour
         prevMousePos = mousePos;
     }
 
-    private bool drawZoneCheck()
+    private bool drawZoneCheck(Vector2 curPos)
     {
-        Ray ray = _cam.ScreenPointToRay(Input.mousePosition);
-        List<RaycastHit2D> results = new List<RaycastHit2D>();
+        Ray ray = _cam.ScreenPointToRay(_cam.WorldToScreenPoint(curPos));
         RaycastHit2D[] hit = Physics2D.GetRayIntersectionAll(ray, Mathf.Infinity);
-
 
 
         foreach (RaycastHit2D hit2D in hit)
         {
             if (hit2D)
             {
-                if (hit2D.collider.tag == "NoDraw" || hit2D.collider.tag == "Player")
+                if (hit2D.collider.tag == "NoDraw")
                 {
                     return false;
                 }
@@ -143,6 +154,25 @@ public class DrawManager : MonoBehaviour
 
             
         }
+
+        Collider2D[] colliders = Physics2D.OverlapCircleAll(curPos, _linePrefab._renderer.startWidth - .03f);
+
+        foreach (Collider2D collider2D in colliders)
+        {
+            if (collider2D)
+            {
+                if (collider2D.tag == "Player")
+                {
+                    return false;
+                }
+            }
+
+
+
+        }
+
+
         return true;
     }
+
 }

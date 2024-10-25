@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using Unity.VisualScripting;
 using UnityEngine;
 
 [RequireComponent(typeof(Controller2D))]
@@ -138,6 +139,10 @@ public class Player : MonoBehaviour
                     coyoteCheckPost = false;
                 }
             }
+            else if(jumpTimeElapsed > holdDuration && jumping)
+            {
+                jumping = false;
+            }
         }
 
         if(Input.GetKeyUp(KeyCode.Space))
@@ -147,7 +152,7 @@ public class Player : MonoBehaviour
 
         float targetVelocityX = input.x * moveSpeed;
         velocity.x = Mathf.SmoothDamp(velocity.x, targetVelocityX, ref velocityXSmoothing, (controller.collisions.below)?accelerationTimeGrounded:accelerationTimeAirborne);
-        if (controller.collisions.left || controller.collisions.right)
+        if (controller.collisions.left || controller.collisions.right && !jumping)
         {
             velocity.x = 0;
         }

@@ -6,7 +6,7 @@ public class Line : MonoBehaviour
 {
     
     
-    [SerializeField] private LineRenderer _renderer;
+    [SerializeField] public LineRenderer _renderer;
     [SerializeField] private PolygonCollider2D _collider;
     public ChalkManager _chalkManager = null;
 
