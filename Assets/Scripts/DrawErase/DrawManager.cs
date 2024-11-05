@@ -17,7 +17,8 @@ public class DrawManager : MonoBehaviour
     private Line _linePrefab;
     public GameObject eraser;
     private GameObject eraserInstance;
-
+    public GameObject screenClear;
+    private GameObject screenClearInstance;
 
     public LayerMask noDrawMask;
     public const float RESOLUTION = .1f;
@@ -130,6 +131,11 @@ public class DrawManager : MonoBehaviour
             }
         }
 
+        if(Input.GetKeyDown("e"))
+        {
+            chalkClear();
+        }
+
         
 
         prevMousePos = mousePos;
@@ -173,6 +179,11 @@ public class DrawManager : MonoBehaviour
 
 
         return true;
+    }
+
+    public void chalkClear()
+    {
+        screenClearInstance = Instantiate(screenClear, Vector3.zero, Quaternion.identity);
     }
 
 }
