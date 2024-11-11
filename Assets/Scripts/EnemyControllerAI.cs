@@ -15,11 +15,8 @@ public class EnemyWander : MonoBehaviour
     MoveType movetype = MoveType.freefall;
     StateType statetype = StateType.passiveMove;
     public LayerMask playerLayer;
-    // public AIPath aIPath;
-    PlayerSearchType pSearchType = PlayerSearchType.colliderSphere;
-    GameObject player;
     private ShootProjectiles projectiles;
-
+    GameObject player;
     Vector3 playerPosition;
     public float moveSpeed = 2.5f; // speed is a factor to be able to allow enemies to walk up slopes
     public float jumpForce = 7f;
