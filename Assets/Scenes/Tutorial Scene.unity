@@ -4061,7 +4061,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 7097510498574473110, guid: e827332f8790fef4a8c87340b3c94656, type: 3}
       propertyPath: m_LocalPosition.x
-      value: -13.242996
+      value: -13.07
       objectReference: {fileID: 0}
     - target: {fileID: 7097510498574473110, guid: e827332f8790fef4a8c87340b3c94656, type: 3}
       propertyPath: m_LocalPosition.y
@@ -10247,9 +10247,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   player: {fileID: 235513718}
-  smoothSpeed: 0.125
-  minBoundary: {x: 0, y: 0}
-  maxBoundary: {x: 0, y: 0}
+  smoothSpeed: 0.2
+  minBoundary: {x: -10, y: -6}
+  maxBoundary: {x: 65, y: 10}
 --- !u!1 &1470824481
 GameObject:
   m_ObjectHideFlags: 0
