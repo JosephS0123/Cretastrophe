@@ -13576,6 +13576,10 @@ PrefabInstance:
       propertyPath: m_AnchoredPosition.y
       value: -86.86542
       objectReference: {fileID: 0}
+    - target: {fileID: 1680255616421771875, guid: 2152a6c29caab7a448f695a1150b2715, type: 3}
+      propertyPath: m_SortingOrder
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 2408264648287990584, guid: 2152a6c29caab7a448f695a1150b2715, type: 3}
       propertyPath: m_AnchorMax.y
       value: 0
@@ -13764,6 +13768,10 @@ PrefabInstance:
       propertyPath: m_Padding.m_Top
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 7742387314137172319, guid: 2152a6c29caab7a448f695a1150b2715, type: 3}
+      propertyPath: drawManager
+      value: 
+      objectReference: {fileID: 1340376736}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
