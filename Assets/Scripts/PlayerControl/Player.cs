@@ -48,7 +48,7 @@ public class Player : MonoBehaviour
     void Update()
     {
         
-        if (controller.collisions.above || controller.collisions.below) 
+        if ((controller.collisions.above && velocity.y > 0) || (controller.collisions.below && velocity.y < 0) && !jumping) 
         {
             if (!controller.collisions.slidingDownMaxSlope)
             {
@@ -152,12 +152,12 @@ public class Player : MonoBehaviour
 
         float targetVelocityX = input.x * moveSpeed;
         velocity.x = Mathf.SmoothDamp(velocity.x, targetVelocityX, ref velocityXSmoothing, (controller.collisions.below)?accelerationTimeGrounded:accelerationTimeAirborne);
-        if (controller.collisions.left || controller.collisions.right && !jumping)
+        if ((controller.collisions.left || controller.collisions.right) && !jumping)
         {
             velocity.x = 0;
         }
         velocity.y += gravity * Time.deltaTime;
-        controller.Move(velocity * Time.deltaTime);
+        controller.Move(velocity * Time.deltaTime, input);
         //Physics.SyncTransforms();
     }
 }

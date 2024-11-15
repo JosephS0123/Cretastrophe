@@ -16,11 +16,6 @@ public class Line : MonoBehaviour
         _collider.transform.position -= transform.position;
     }
 
-    void Update()
-    {
-        
-    }
-
     public bool SetPosition(Vector2 pos)
     {
         if (!CanAppend(pos)) return false;

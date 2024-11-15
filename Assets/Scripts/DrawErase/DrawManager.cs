@@ -151,7 +151,7 @@ public class DrawManager : MonoBehaviour
         {
             if (hit2D)
             {
-                if (hit2D.collider.tag == "NoDraw")
+                if (hit2D.collider.tag == "NoDraw" || hit2D.collider.tag == "Eraser")
                 {
                     return false;
                 }

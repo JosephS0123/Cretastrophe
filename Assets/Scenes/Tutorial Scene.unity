@@ -10248,7 +10248,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   player: {fileID: 235513718}
-  smoothSpeed: 0.2
+  smoothSpeed: 0.1
   minBoundary: {x: -10, y: -6}
   maxBoundary: {x: 65, y: 10}
 --- !u!1 &1470824481
