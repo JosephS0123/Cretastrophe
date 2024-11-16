@@ -8,9 +8,9 @@ public class ShootProjectiles : MonoBehaviour
 
     private float lastFireTime = 0;       
     private int projectileCt = 0;
-    private Vector2[] directions;
+    private float[] directions;
     
-    public void FireProjectiles(Vector2 position, Vector2 lookDirection)
+    public void FireProjectiles(Vector2 position, Vector2 lookDirection, Vector2 playerPos)
     {
         // Only fire if enough time has passed
         if (Time.time - lastFireTime >= fireRate)
@@ -23,26 +23,48 @@ public class ShootProjectiles : MonoBehaviour
                 return;
             }
 
-            // Instantiate and fire projectiles
-            for (int i = 0; i < projectileCt; i++)
-            {
-                Vector2 spawnPosition = position + new Vector2 (.32f * lookDirection.x, 0);  
+            // Fire directly at player position
+            if (projectileCt == 1) {
+                Vector2 direction = playerPos - (Vector2)transform.position;
+                float angleInRadians = Mathf.Atan2(direction.y, direction.x);
+                directions[0] = angleInRadians * Mathf.Rad2Deg;
+
+                Vector2 spawnPosition = position + new Vector2 (.1f * lookDirection.x, 0);  
                 GameObject projectile = Instantiate(projectilePrefab, spawnPosition, Quaternion.identity);
                 Projectile projScript = projectile.GetComponent<Projectile>();
-                projScript.direction = directions[i] * new Vector2(-lookDirection.x, 1);  
-                projScript.speed = projectileSpeed;
+                projScript.direction = directions[0];
+                projScript.speed = projectileSpeed * 2;
+            } else {
+                // Instantiate and fire projectiles
+                for (int i = 0; i < projectileCt; i++)
+                {
+                    Vector2 spawnPosition = position + new Vector2 (.1f * lookDirection.x, 0);  
+                    GameObject projectile = Instantiate(projectilePrefab, spawnPosition, Quaternion.identity);
+                    Projectile projScript = projectile.GetComponent<Projectile>();
+
+                    /* Ensure symmetry and correct launch angles of projectiles */
+                    if (lookDirection.x > 0) {
+                        projScript.direction = directions[i];
+                    } else {
+                        projScript.direction = 180f - directions[i];
+                    }
+                    projScript.speed = projectileSpeed * 2;
+                }
             }
         }
     }
 
+    /* Assign the expected projectile spread for 2+ shots */
     public void setProjectileCount(int numProjectiles, string prefabName)
     {
         projectileCt = numProjectiles;
-        directions = new Vector2[projectileCt];
+        directions = new float[projectileCt];
         projectilePrefab = Resources.Load<GameObject>("Prefabs/" + prefabName);
 
+        float angleBetweenShots = 90f / (numProjectiles + 2);
+
         for (int i = 0; i < projectileCt; i++) {
-            directions[i] = new Vector2(transform.right.x, (projectileCt-i) * 2f / projectileCt);
+            directions[i] = (i+1) * angleBetweenShots;
         }
     }
 }

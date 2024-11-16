@@ -8,54 +8,71 @@ and continuous collision detection
 */
 public class EnemyWander : MonoBehaviour
 {
-
+    /* enemy state management */
     private enum MoveType {straight, freefall, reverse, idle, startJump, midJump, fallOff};
     private enum StateType {combatMove, combatStill, passiveMove};
     private enum PlayerSearchType {colliderSphere, lineOfSight, onContact};
-    MoveType movetype = MoveType.freefall;
-    StateType statetype = StateType.passiveMove;
-    public LayerMask playerLayer;
+    MoveType movetype;
+    StateType statetype;
     private ShootProjectiles projectiles;
+    public int projectileCount = 1;
+
+    /* Positioning Related Info */
+    public LayerMask groundLayer; /* Obstacle layer | May need considerations for other interactions*/
+    public LayerMask playerLayer;
     GameObject player;
     Vector3 playerPosition;
+
+    /* Enemy Movement Attributes */
     public float moveSpeed = 2.5f; // speed is a factor to be able to allow enemies to walk up slopes
     public float jumpForce = 7f;
     public float hopForce = 1f;
-    public LayerMask groundLayer; /* Obstacle layer | May need considerations for other interactions*/
+    private bool gapAhead = false;
+    private bool isWallAhead = false;
 
+    /* Enemy Unity stuff*/
     private Rigidbody2D rb;
     private BoxCollider2D enemyCollider;
     private CircleCollider2D playerDetectionCollider;
 
-    private bool isFacingRight;
+    /* Useful Enemy attributes */
+    private bool isFacingRight; /* TODO: set ALL enemies to face left or right PHYSICALLY */
 
     private Vector2 lookDirection; /* Should be a simple ((-1 or 1), 0) Vec2 */
     private float enemyWidth; /* collider bounds */
     private float enemyHeight; /* collider bounds */
-    private bool gapAhead = false;
 
+    /* Stats to prevent getting stuck in pos */
     private Vector3 prevPos;
     private Vector3 prevPrevPos;
     private bool prevLookingRight;
     private bool prevPrevLookingRight;
-    private bool isWallAhead = false;
     
     /* or should be an Awake() method? */
     void Start()
     {
+        /* Don't want enemy to move if falling down, will begin to move upon contact w/ ground
+            Enemy also starts of not in aggro
+        */
+        movetype = MoveType.freefall;
+        statetype = StateType.passiveMove;
+
         rb = GetComponent<Rigidbody2D>();
         enemyCollider = GetComponent<BoxCollider2D>(); 
         playerDetectionCollider = GetComponent<CircleCollider2D>(); 
+        enemyWidth = enemyCollider.size.x * transform.localScale.x;
+        enemyHeight = enemyCollider.size.y * transform.localScale.y;
         SetLookDirection();
-        enemyWidth = enemyCollider.size.x * transform.localScale.x;;
-        enemyHeight = enemyCollider.size.y * transform.localScale.y;;
+
         clearOldPositions();
         player = GameObject.Find("Player");
         playerLayer = LayerMask.GetMask("Player");
+
         projectiles = gameObject.AddComponent<ShootProjectiles>();
-        projectiles.setProjectileCount(5, "Projectile");
+        projectiles.setProjectileCount(projectileCount, "Projectile");
     }
 
+    // "Resets" position trackers due to transitions from certain enemy states 
     void clearOldPositions()
     {
         prevPos = transform.position - new Vector3(1f, 1f, 0);
@@ -64,8 +81,7 @@ public class EnemyWander : MonoBehaviour
         prevPrevLookingRight = prevLookingRight;
     }
 
-
-
+    // debugging 
     void printMovetype()
     {
         switch (movetype)
@@ -541,7 +557,7 @@ public class EnemyWander : MonoBehaviour
         }
 
         clearOldPositions();
-        projectiles.FireProjectiles((Vector2)transform.position + new Vector2 (enemyWidth/2f * lookDirection.x, 0), lookDirection);
+        projectiles.FireProjectiles((Vector2)transform.position + new Vector2 (enemyWidth/2f * lookDirection.x, 0), lookDirection, (Vector2)playerPosition);
     }
     void GetPlayerPosition()
     {
@@ -559,5 +575,61 @@ public class EnemyWander : MonoBehaviour
             Debug.LogWarning("Player not found! Player Model is not currently Loaded!");
             Debug.LogWarning("Player not found! Player Model is not currently Loaded!");
         }
+    }
+
+    float getLookDirAngle() {
+        bool lookRight = lookDirection.x > 0 ? true : false;
+        float angleFromXAxis = 45f + (lookRight ? 0f : 180f);
+        return angleFromXAxis;
+    }
+    bool IsObjectInFieldOfView(Vector3 lookDirection, float viewConeAngle, Vector3 playerPosition)
+    {
+        // Set an eye position
+        Vector3 viewerPosition = transform.position + new Vector3(this.lookDirection.x * enemyWidth/2f, enemyHeight/4f, 0);
+
+        lookDirection.z = 0;
+        playerPosition.z = 0;
+        viewerPosition.z = 0;
+        
+        // Normalize the look direction (2D) to ensure it's a unit vector
+        lookDirection.Normalize();
+
+        // Calculate the vector from the viewer to the Player (2D)
+        Vector3 toPlayer = (playerPosition - viewerPosition).normalized;
+
+        // Normalize the vector from the viewer to the Player (2D)
+        float dotProduct = Vector3.Dot(lookDirection, toPlayer);
+
+        // Calculate the cosine of half the field of view angle
+        float maxDot = Mathf.Cos(viewConeAngle * 0.5f * Mathf.Deg2Rad);
+
+        // Check if the dot product is within the acceptable range (i.e., within the field of view)
+        return dotProduct >= maxDot;
+    }
+
+    // Method to check if the Player is within the field of view (FOV) of Enemy, 
+    // where the look direction is given as an angle (in degrees)
+    bool IsObjectInFOV(float lookDirectionAngle, float viewConeAngle, Vector3 playerPosition)
+    {
+        float lookDirectionX = Mathf.Cos(lookDirectionAngle * Mathf.Deg2Rad);
+        float lookDirectionY = Mathf.Sin(lookDirectionAngle * Mathf.Deg2Rad);
+        Vector3 lookDirection = new Vector3(lookDirectionX, lookDirectionY, 0).normalized; // 2D look direction in the x-y plane
+
+        Vector3 viewerPosition = transform.position + new Vector3(this.lookDirection.x * enemyWidth/2f, enemyHeight/4f, 0);
+
+        playerPosition.z = 0;
+        viewerPosition.z = 0;
+        
+        // Calculate the vector from the viewer to the Player (2D)
+        Vector3 toPlayer = (playerPosition - viewerPosition).normalized;
+
+        // Calculate the dot product between the normalized look direction and the vector to the Player
+        float dotProduct = Vector3.Dot(lookDirection, toPlayer);
+
+        // Calculate the cosine of half the field of view angle
+        float maxDot = Mathf.Cos(viewConeAngle * 0.5f * Mathf.Deg2Rad);
+
+        // Check if the dot product is within the acceptable range (i.e., within the field of view)
+        return dotProduct >= maxDot;
     }
 }
