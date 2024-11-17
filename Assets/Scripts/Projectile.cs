@@ -10,6 +10,7 @@ public class Projectile : MonoBehaviour
     void Start()
     {
         float angleInRadians = direction * Mathf.Deg2Rad;
+        angleInRadians += (angleInRadians > 1.55f) ? -.2f : .2f;
         Vector2 directionVector = new Vector2(Mathf.Cos(angleInRadians), Mathf.Sin(angleInRadians));
         rb = GetComponent<Rigidbody2D>();
         
@@ -46,7 +47,7 @@ public class Projectile : MonoBehaviour
             else if (other.gameObject.layer == LayerMask.NameToLayer("Obstacle"))
             {
                 Destroy(gameObject);
-                Debug.Log("Hit an obstacle!");
+                // Debug.Log("Hit an obstacle!");
             }
         }
     }

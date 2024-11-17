@@ -4,7 +4,7 @@ public class ShootProjectiles : MonoBehaviour
 {
     public GameObject projectilePrefab;  
     private float fireRate = 2f; // Time between each shot (in seconds)
-    private float projectileSpeed = 6f;  
+    private float projectileSpeed = 12f;  
 
     private float lastFireTime = 0;       
     private int projectileCt = 0;
@@ -50,13 +50,15 @@ public class ShootProjectiles : MonoBehaviour
                     }
                     projScript.speed = projectileSpeed * 2;
                 }
+                projectileCt--;
             }
         }
     }
 
     /* Assign the expected projectile spread for 2+ shots */
-    public void setProjectileCount(int numProjectiles, string prefabName)
+    public void setProjectileCount(int numProjectiles, string prefabName, float projectileSpd)
     {
+        projectileSpeed = projectileSpd;
         projectileCt = numProjectiles;
         directions = new float[projectileCt];
         projectilePrefab = Resources.Load<GameObject>("Prefabs/" + prefabName);
