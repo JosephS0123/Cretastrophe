@@ -6,56 +6,117 @@ using UnityEngine;
 expect a DYNAMIC body type
 and continuous collision detection
 */
-public class EnemyWander : MonoBehaviour
+public class EnemyControllerAI : MonoBehaviour
 {
-
+    /* enemy state management */
     private enum MoveType {straight, freefall, reverse, idle, startJump, midJump, fallOff};
-    private enum StateType {combatMove, combatStill, passiveMove};
-    private enum PlayerSearchType {colliderSphere, lineOfSight, onContact};
-    MoveType movetype = MoveType.freefall;
-    StateType statetype = StateType.passiveMove;
-    public LayerMask playerLayer;
+    /*  combatMove is chase and run
+        combatStill is sit and shoot
+        mobile is just moving around
+        immobile is sit and do "nothing"
+    */
+    public enum StateType {combatMove, combatStill, mobile, immobile};
+    public enum PlayerSearchType {colliderSphere, lineOfSight, onContact, passive};
+    public enum EnemyBehaviorType {wanderer, patroller, immobile, eraser};
+    public enum ViewType {constant, dynamic}; // keep eye at same pos or allow enemy to look up/down at diff point in time
+    
+    /* Enemy Behavior */
+    private MoveType movetype;
+    private StateType statetype;
+    public StateType defaultStateMobileType = StateType.mobile;
+    public StateType defaultStateCombatType = StateType.combatStill;
+    public PlayerSearchType searchType;
+    public ViewType enemyViewType = ViewType.constant;
     private ShootProjectiles projectiles;
+    public int projectileCount = 1;
+    public float projectileSpeed = 6f;
+    public float playerDetectRadius = 3f;
+    public float viewCone = 45f; // Enemies FOV +- viewcone/2
+    private float actualViewCone;
+    public float lookDirectionAngle = 25f; // the point where the enemy is looking 
+    private float actualLookDirectionAngle;
+    public int aggroFrameTime = 5; // Allow enemy to remain aggroed for N frames
+    private int aggroFrameTimeRemaining; // Counter of frames left, reset upon reaggro
+
+    /* Positioning Related Info */
+    public LayerMask groundLayer; /* Obstacle layer | May need considerations for other interactions*/
+    public LayerMask playerLayer;
     GameObject player;
     Vector3 playerPosition;
+    BoxCollider2D playerBoxCollider;
+    float playerWidth;
+    float playerHeight;
+
+    /* Enemy Movement Attributes */
     public float moveSpeed = 2.5f; // speed is a factor to be able to allow enemies to walk up slopes
     public float jumpForce = 7f;
     public float hopForce = 1f;
-    public LayerMask groundLayer; /* Obstacle layer | May need considerations for other interactions*/
+    private bool gapAhead = false;
+    private bool isWallAhead = false;
+    private int stuckCounter = 0;
 
+    /* Enemy Unity stuff*/
     private Rigidbody2D rb;
     private BoxCollider2D enemyCollider;
     private CircleCollider2D playerDetectionCollider;
 
-    private bool isFacingRight;
+    /* Useful Enemy attributes */
+    private bool isFacingRight; /* TODO: set ALL enemies to face left or right PHYSICALLY */
 
     private Vector2 lookDirection; /* Should be a simple ((-1 or 1), 0) Vec2 */
     private float enemyWidth; /* collider bounds */
     private float enemyHeight; /* collider bounds */
-    private bool gapAhead = false;
 
+    /* Stats to prevent getting stuck in pos */
     private Vector3 prevPos;
     private Vector3 prevPrevPos;
     private bool prevLookingRight;
     private bool prevPrevLookingRight;
-    private bool isWallAhead = false;
     
     /* or should be an Awake() method? */
     void Start()
     {
+        /* Don't want enemy to move if falling down, will begin to move upon contact w/ ground
+            Enemy also starts of not in aggro
+        */
+        movetype = MoveType.freefall;
+        statetype = StateType.mobile;
+
         rb = GetComponent<Rigidbody2D>();
         enemyCollider = GetComponent<BoxCollider2D>(); 
-        playerDetectionCollider = GetComponent<CircleCollider2D>(); 
+        enemyWidth = enemyCollider.size.x * transform.localScale.x;
+        enemyHeight = enemyCollider.size.y * transform.localScale.y;
         SetLookDirection();
-        enemyWidth = enemyCollider.size.x * transform.localScale.x;;
-        enemyHeight = enemyCollider.size.y * transform.localScale.y;;
+
         clearOldPositions();
         player = GameObject.Find("Player");
         playerLayer = LayerMask.GetMask("Player");
+        playerBoxCollider = player.GetComponent<BoxCollider2D>();
+        playerWidth = playerBoxCollider.size.x;
+        playerHeight = playerBoxCollider.size.y;
+
+        actualViewCone = viewCone;
+        aggroFrameTimeRemaining = aggroFrameTime;
+        actualLookDirectionAngle = lookDirectionAngle;
+
         projectiles = gameObject.AddComponent<ShootProjectiles>();
-        projectiles.setProjectileCount(5, "Projectile");
+        projectiles.setProjectileCount(projectileCount, "Projectile", projectileSpeed);
+
+        switch (searchType) {
+            case PlayerSearchType.colliderSphere:
+                InstantiateCircleCollider(playerDetectRadius, Vector2.zero, true);
+                break;
+            case PlayerSearchType.lineOfSight:
+                break;
+            case PlayerSearchType.onContact:
+                break;
+            default:
+                /* do nothing */
+                break;
+        }
     }
 
+    // "Resets" position trackers due to transitions from certain enemy states 
     void clearOldPositions()
     {
         prevPos = transform.position - new Vector3(1f, 1f, 0);
@@ -64,8 +125,7 @@ public class EnemyWander : MonoBehaviour
         prevPrevLookingRight = prevLookingRight;
     }
 
-
-
+    // debugging 
     void printMovetype()
     {
         switch (movetype)
@@ -104,30 +164,109 @@ public class EnemyWander : MonoBehaviour
 
     void checkState()
     {
+        // Check possible movestates first in order to prevent a weird race-like conditions
+        TryMove();
+        // Updates statetype based on the manner of which the enemy aggroes onto player (if it does)
+        playerSearch();
+
         switch (statetype){
             case StateType.combatMove:
                 /* not implemented yet */
                 break;
             case StateType.combatStill:
-                /* WIP */
+                /* 
+                    WIP
+                    Enemy is aggroed, stay still and shoot while aggroed til not
+                */
                 updateCombatStill();
                 break;
-            case StateType.passiveMove:
-                /* WIP partially? mostly done */
+            case StateType.mobile:
+                /* 
+                    WIP partially? 
+                    Currently passive, check for player activating aggro
+                */
                 updatePassiveMove();
+                break;
+            case StateType.immobile:
+                /*todo maybe*/
                 break;
             default:
                 break;
         }
     }
 
-    void updatePassiveMove()
+    /* Checks for player update if need be, updates enemy behavior if trigger occurs */
+    /* Much pain ensued */
+    void playerSearch()
     {
-        TryMove(); 
-        if (IsStuck()) {
-            movetype = MoveType.reverse;
+        // Ensure not taking over a "Critical" moment of movement which may cause unwanted enemy behavior
+        if (movetype == MoveType.midJump || movetype == MoveType.freefall || movetype == MoveType.startJump || movetype == MoveType.fallOff) {
+            aggroFrameTimeRemaining--;
+            statetype = StateType.mobile;
+            return;
         }
 
+        // select enemy behavior based on how they "react" to "presence" of a player
+        switch (searchType)
+        {
+            // Maybe delete the circlecollider2D in favor for IsWithinRadius() since same thing && more concise (later if i care)
+            case PlayerSearchType.colliderSphere:
+                break;
+            case PlayerSearchType.lineOfSight:
+                GetPlayerPosition();
+
+                // If enemy has clear Line of Sight on player w/o total obstruction
+                if (IsWithinRadius((Vector2)playerPosition, playerDetectRadius)) {
+                    if (isValidLOS()) {
+                        statetype = defaultStateCombatType;
+                        aggroFrameTimeRemaining = aggroFrameTime;
+                    } 
+                } 
+                // reduce time buffer if frame time since last valid LOS, restore "mobility" if expires
+                aggroFrameTimeRemaining--;
+                if (aggroFrameTimeRemaining <= 0) {
+                    statetype = defaultStateMobileType;
+                }
+                
+                break;
+            // Prob wont exist since player dies on contact
+            case PlayerSearchType.onContact:
+                /* Kill player */
+                break;
+            case PlayerSearchType.passive:
+                /*TODO: maybe consider adding a still mob (like a sitting puppy with tail wagging)
+                        that when the player steps/runs on it, it creates a near insta-death punishment trigger
+                        questiniong what the player did (for the lols)
+                */
+                statetype = defaultStateMobileType; // Do as you do w/o aggro, auto aggroes if player enters bubble
+                break;
+            default:
+            /* Do nothing*/
+                break;
+        }
+
+    }
+
+    /* Perform unaggroed movement */
+    void updatePassiveMove()
+    {
+        // Ensure that it doesn't make hasty decision that it "is" stuck 
+        // and reduces the amount of positions to be stored to make checks
+        if (IsStuck()) {
+            if (stuckCounter > 12 ) {
+                if (!IsWallAhead() && !IsGapAhead() && !IsUnsafeGap()) {
+                    movetype = MoveType.straight;
+                } else {
+                    movetype = MoveType.reverse;
+                }
+            }
+            /* Breaks enemy movement, unsure if possible to currently implement */
+            // if (rollDice(1f) && CanJump()) {
+            //     movetype = MoveType.startJump;
+            // }
+        } else {
+            stuckCounter = 0;
+        }
         // debug current movetype
         // printMovetype();
 
@@ -165,6 +304,7 @@ public class EnemyWander : MonoBehaviour
         prevPos = transform.position;
     }
 
+    /* self-explanatory dontcha think? */
     void TryMove()
     {
         /* walls and gaps cant happen at the same place, wall takes priority
@@ -279,11 +419,11 @@ public class EnemyWander : MonoBehaviour
     bool IsSlope()
     {
         /* .8 / .85f may be a stretch to try */
-        float vertRayLengthDown = .9f * enemyHeight; // Length of the vertical ray + 5% error
+        float vertRayLengthDown = .9f * enemyHeight; 
         float yOffsetBottom = -enemyHeight / 2; // Just above the bottom edge
         float horizRayLength = 0.1f; 
         float xOffset = enemyWidth / 2f * (isFacingRight ? 1 : -1);
-        // float vertRayLength = 1.05f * enemyHeight; // Length of the vertical ray + 5% error
+        // float vertRayLength = 1.05f * enemyHeight; // was considering using this one for checking if downward slope
         Vector2 bottomRayOrigin = (Vector2)transform.position + new Vector2(xOffset, yOffsetBottom);
         RaycastHit2D bottomHit = Physics2D.Raycast(bottomRayOrigin, lookDirection, horizRayLength, groundLayer);
         Debug.DrawRay(bottomRayOrigin, lookDirection * horizRayLength, Color.cyan);
@@ -316,15 +456,7 @@ public class EnemyWander : MonoBehaviour
         // a horizontal raycast, width of enemy
         Vector2 frontRayOrigin = (Vector2)transform.position + new Vector2 (lookDirection.x * enemyWidth/2 + .03f, -yOffset); 
         RaycastHit2D frontRayImmediate = Physics2D.Raycast(frontRayOrigin, lookDirection, horzRayLength, groundLayer);
-        // RaycastHit2D frontRayAhead = Physics2D.Raycast((Vector2)transform.position + new Vector2 (3 * enemyWidth/2, -yOffset), lookDirection, horzRayLength, groundLayer);
-
         Debug.DrawRay(frontRayOrigin, lookDirection * horzRayLength, Color.red);
-        // Debug.DrawRay((Vector2)transform.position + new Vector2 (5 * dir * enemyWidth/2, -yOffset), -lookDirection * horzRayLength, Color.green);
-
-        // Return true if ray did not hit anything (gap detected)
-        // print(frontRayImmediate.collider == null);
-        // print("is gap ahead?");
-        // print(frontRayImmediate.collider == null);
         return frontRayImmediate.collider == null;
     }
 
@@ -332,20 +464,14 @@ public class EnemyWander : MonoBehaviour
     bool IsUnsafeGap()
     {
         float vertRayLength = 6 * enemyHeight;
-
         float xOffset = enemyWidth/2 + 0.15f;
 
-        Vector2 frontRayOrigin = (Vector2)transform.position + new Vector2 (lookDirection.x * xOffset, 0); 
-
         // Cast the vertical rays downwards
+        Vector2 frontRayOrigin = (Vector2)transform.position + new Vector2 (lookDirection.x * xOffset, 0); 
         RaycastHit2D frontHit = Physics2D.Raycast(frontRayOrigin, Vector2.down, vertRayLength, groundLayer);
+        Debug.DrawRay(frontRayOrigin, Vector2.down * vertRayLength, Color.red);
 
-        // Draw the rays for debugging
-        // if (!frontHit) {
-            Debug.DrawRay(frontRayOrigin, Vector2.down * vertRayLength, Color.red);
-        // }
-
-        // Return true if both rays hit nothing (indicating a safe gap)
+        // No safe ground was in contact if null therefore unsafe
         print("is unsafe gap?");
         print(frontHit.collider == null);
         return frontHit.collider == null;
@@ -425,38 +551,23 @@ public class EnemyWander : MonoBehaviour
         Debug.DrawRay(bottomRayOrigin, lookDirection * enemyWidth, Color.green);
         
         return bottomRayImmediate.collider != null;
-
-        // Calculate positions for three rays: left edge, center, and right edge
-        // Vector2 leftRayOrigin = (Vector2)transform.position + Vector2.down * rayOffsetY - lookDirection * enemyWidth/2;
-        // Vector2 centerRayOrigin = (Vector2)transform.position + Vector2.down * rayOffsetY;
-        // Vector2 rightRayOrigin = (Vector2)transform.position + Vector2.down * rayOffsetY + lookDirection * enemyWidth/2;
-
-        // Did the rays hit anything
-        // bool leftHit = Physics2D.Raycast(leftRayOrigin, Vector2.down, rayLength, groundLayer);
-        // bool centerHit = Physics2D.Raycast(centerRayOrigin, Vector2.down, rayLength, groundLayer);
-        // bool rightHit = Physics2D.Raycast(rightRayOrigin, Vector2.down, rayLength, groundLayer);
-
-        // Debug.DrawRay(leftRayOrigin, Vector2.down * rayLength, Color.green);
-        // Debug.DrawRay(centerRayOrigin, Vector2.down * rayLength, Color.green);
-        // Debug.DrawRay(rightRayOrigin, Vector2.down * rayLength, Color.green);  
-        // Return true if any ray hits the ground (grounded)
-        // return leftHit || centerHit || rightHit;
     }
 
 
+    // RNG, not much use 
     bool rollDice(float successPercentRate)
     {
         return Random.Range(0f, 1f) < successPercentRate;
     }
 
-    /* WIP not sure if useful */
+    /* checks previous 2 frames + current to see if enemy is "possibly stuck" */
     bool IsStuck() 
     {
-        // in same pos past 2 frames & currently
         if (prevPrevPos == prevPos && prevPos == transform.position) 
         {
             if (prevPrevLookingRight == prevLookingRight && prevLookingRight== isFacingRight) {
                 print("IS STUCK\n\n\n");
+                stuckCounter++;
                 return true;
             }
         }
@@ -473,11 +584,19 @@ public class EnemyWander : MonoBehaviour
         rb.velocity = new Vector2(0, rb.velocity.y);
     }
 
-    /* Update the enemy look direction and sprite model */
+    /* Update the enemy look direction, eye direction and sprite model */
     void TurnAround()
     {
         isFacingRight = !isFacingRight;
-        lookDirection.x = -lookDirection.x; 
+        lookDirection.x = -lookDirection.x;
+
+        if (lookDirection.x > 0) {
+            actualViewCone = viewCone;
+            actualLookDirectionAngle = lookDirectionAngle;
+        } else {
+            actualViewCone = 180 - viewCone;
+            actualLookDirectionAngle = 180 - lookDirectionAngle;
+        }
 
         if (transform.rotation.x <= 180.0f) {
             transform.Rotate(0f, -180f, 0f);
@@ -487,35 +606,37 @@ public class EnemyWander : MonoBehaviour
     }
 
     // Detect when something contacts with either enemy hitbox or aggroCollider
-    // Enter some attack mode here
+    // currently does nothing
+    /* TODO: access a class to kill off player */
     private void OnTriggerEnter2D(Collider2D other)
     {
         // Check if the player entered the aggro range
         if (((1 << other.gameObject.layer) & playerLayer) != 0)
         {
-            if (other.IsTouching(playerDetectionCollider) && IsGrounded()) {
+            if (playerDetectionCollider != null && other.IsTouching(playerDetectionCollider) && IsGrounded()) {
                 /* Set default aggro behavior*/
                 Debug.Log("Player entered aggro range!");
-                statetype = StateType.combatStill;
+                statetype = defaultStateCombatType;
                 movetype = MoveType.freefall;
                 DoFall();
-            } else if (other.IsTouching(playerDetectionCollider)) {
+            } else if (playerDetectionCollider != null && other.IsTouching(playerDetectionCollider)) {
                 /* TODO: insert player kill logic here*/
                 Debug.Log("Player SHOULD DIE HERE!");
             }
         } 
     }
 
-    // Optionally, detect when the player exits the aggro range
+    // detect when the player exits the aggro range
     // Exit attack mode here and return to normal conditions
+    /* No real use atm*/
     private void OnTriggerExit2D(Collider2D other)
     {
         if (((1 << other.gameObject.layer) & playerLayer) != 0)
         {
-            if (!other.IsTouching(playerDetectionCollider)) {
+            if (playerDetectionCollider != null && !other.IsTouching(playerDetectionCollider)) {
                 /* Set default move behavior*/
                 Debug.Log("Player left aggro range!");
-                statetype = StateType.passiveMove;
+                statetype = StateType.mobile;
                 movetype = MoveType.freefall;
                 DoFall();
             }
@@ -541,14 +662,15 @@ public class EnemyWander : MonoBehaviour
         }
 
         clearOldPositions();
-        projectiles.FireProjectiles((Vector2)transform.position + new Vector2 (enemyWidth/2f * lookDirection.x, 0), lookDirection);
+        projectiles.FireProjectiles((Vector2)transform.position + new Vector2 (enemyWidth/2f * lookDirection.x, 0), lookDirection, (Vector2)playerPosition);
     }
+
+    // nuff sed
     void GetPlayerPosition()
     {
         if (player != null)
         {
             playerPosition = player.transform.position;
-            // Debug.Log("Player Position: " + playerPosition);
         }
         else
         {
@@ -559,5 +681,123 @@ public class EnemyWander : MonoBehaviour
             Debug.LogWarning("Player not found! Player Model is not currently Loaded!");
             Debug.LogWarning("Player not found! Player Model is not currently Loaded!");
         }
+    }
+
+    // linear alegegra AHHHH!
+    bool IsWithinRadius(Vector2 targetPosition, float radius)
+    {
+        float distance = Vector2.Distance(transform.position, targetPosition);
+        return distance <= radius;
+    }
+
+    // more linea albegra AGGGGG!! 
+    bool isValidLOS()
+    {
+        Vector3 bottomCornerPos = player.transform.position + (lookDirection.x > 0 ? new Vector3(playerWidth/2, -playerHeight/2, 0) : new Vector3(-playerWidth/2, -playerHeight/2, 0));
+        Vector3 centerPos = player.transform.position;
+        Vector3 topCornerPos = player.transform.position + (lookDirection.x > 0 ? new Vector3(-playerWidth/2, playerHeight/2, 0) : new Vector3(playerWidth/2, playerHeight/2, 0));
+
+        bool bottomCorner = IsPlayerInLOS(actualLookDirectionAngle, actualViewCone, bottomCornerPos);
+        bool center = IsPlayerInLOS(actualLookDirectionAngle, actualViewCone, centerPos);
+        bool topCorner = IsPlayerInLOS(actualLookDirectionAngle, actualViewCone, topCornerPos);
+
+        if (bottomCorner) {
+            if (CastRayToTarget(bottomCornerPos)) {
+                DrawRay((Vector2)transform.position, actualLookDirectionAngle);
+                return true;
+            }
+        } if (center) {
+            if (CastRayToTarget(centerPos)) {
+                DrawRay((Vector2)transform.position, actualLookDirectionAngle);
+                return true;
+            }
+        } if (topCorner) {
+            if (CastRayToTarget(topCornerPos)) {
+                DrawRay((Vector2)transform.position, actualLookDirectionAngle);   
+                return true;
+            }
+        }
+        return false;
+    }
+
+    // Shorthand to draw rays from enemy to player
+    void DrawRay(Vector2 origin, float angle)
+    {
+        float angleInRadians = angle * Mathf.Deg2Rad;
+
+        Vector2 direction = new Vector2(Mathf.Cos(angleInRadians), Mathf.Sin(angleInRadians));
+
+        float rayLength = Vector2.Distance(transform.position, playerPosition);
+        Vector2 endPoint = origin + direction * rayLength;
+
+        Debug.DrawLine(origin, endPoint, Color.red); 
+    }
+
+    bool CastRayToTarget(Vector3 targetPoint)
+    {
+        Vector2 startPos = transform.position;
+
+        // Calculate the direction from the current object to the target point
+        Vector2 direction = (targetPoint - transform.position).normalized;
+        RaycastHit2D hit = Physics2D.Raycast(startPos, direction, Mathf.Infinity, groundLayer | playerLayer);
+
+        // Check if the ray hit something
+        if (hit.collider != null)
+        {
+            // Check if the object hit is on the Obstacle layer
+            if (((1 << hit.collider.gameObject.layer) & groundLayer) != 0)
+            {
+                // Debug.Log("Hit an obstacle: " + hit.collider.gameObject.name);
+                // Debug.DrawLine(startPos, hit.point, Color.red, 1f); 
+                return false; 
+            }
+            else if (((1 << hit.collider.gameObject.layer) & playerLayer) != 0)
+            {
+                // Debug.Log("Hit the player: " + hit.collider.gameObject.name);
+                // Debug.DrawLine(startPos, hit.point, Color.blue, 1f);
+                return true; 
+            }
+        }
+        else
+        {
+            Debug.Log("Ray did not hit anything.");
+            Debug.DrawLine(startPos, startPos + direction * Vector2.Distance(transform.position, playerPosition), Color.green, 1f); 
+        }
+
+        return false; 
+    }
+
+    // Call this 3 times, 2 for corners facing enemy and 1 for center
+    bool IsPlayerInLOS(float lookDirectionAngle, float viewConeAngle, Vector3 playerPosition)
+    {
+        float lookDirectionX = Mathf.Cos(lookDirectionAngle * Mathf.Deg2Rad);
+        float lookDirectionY = Mathf.Sin(lookDirectionAngle * Mathf.Deg2Rad);
+        Vector3 lookDirection = new Vector3(lookDirectionX, lookDirectionY, 0).normalized; // 2D look direction in the x-y plane
+
+        Vector3 viewerPosition = transform.position + new Vector3(this.lookDirection.x * enemyWidth/2f, enemyHeight/4f, 0);
+
+        playerPosition.z = 0;
+        viewerPosition.z = 0;
+        
+        // Calculate the vector from the viewer to the Player (2D)
+        Vector3 toPlayer = (playerPosition - viewerPosition).normalized;
+
+        // Calculate the dot product between the normalized look direction and the vector to the Player
+        float dotProduct = Vector3.Dot(lookDirection, toPlayer);
+
+        // Calculate the cosine of half the field of view angle
+        float maxDot = Mathf.Cos(viewConeAngle * 0.5f * Mathf.Deg2Rad);
+
+        // Check if the dot product is within the acceptable range (i.e., within the field of view)
+        return dotProduct >= maxDot;
+    }
+
+    // If the method to aggro is using within detection radius
+    private void InstantiateCircleCollider(float radius, Vector2 offset, bool isTrigger)
+    {
+        playerDetectionCollider = gameObject.AddComponent<CircleCollider2D>();
+        playerDetectionCollider.radius = radius;
+        playerDetectionCollider.isTrigger = isTrigger;
+        playerDetectionCollider.offset = offset;
     }
 }

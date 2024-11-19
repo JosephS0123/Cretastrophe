@@ -3,17 +3,19 @@ using UnityEngine;
 public class Projectile : MonoBehaviour
 {
     public float speed = 5f;      
-    public Vector2 direction = new Vector2(0,0);      
+    public float direction;
 
     private Rigidbody2D rb;
 
     void Start()
     {
+        float angleInRadians = direction * Mathf.Deg2Rad;
+        angleInRadians += (angleInRadians > 1.55f) ? -.2f : .2f;
+        Vector2 directionVector = new Vector2(Mathf.Cos(angleInRadians), Mathf.Sin(angleInRadians));
         rb = GetComponent<Rigidbody2D>();
         
-        rb.velocity = direction * speed; 
-        float angle = Mathf.Atan2(direction.y, direction.x) * Mathf.Rad2Deg;
-        transform.rotation = Quaternion.Euler(new Vector3(0, 0, angle));
+        rb.velocity = directionVector.normalized * speed; 
+        transform.rotation = Quaternion.Euler(new Vector3(0, 0, direction));
     }
 
     /* remove this ?*/
@@ -45,7 +47,7 @@ public class Projectile : MonoBehaviour
             else if (other.gameObject.layer == LayerMask.NameToLayer("Obstacle"))
             {
                 Destroy(gameObject);
-                Debug.Log("Hit an obstacle!");
+                // Debug.Log("Hit an obstacle!");
             }
         }
     }
