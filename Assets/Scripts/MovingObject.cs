@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using Pathfinding;
 using UnityEngine;
 
 public class MovingObject : MonoBehaviour
@@ -26,6 +27,10 @@ public class MovingObject : MonoBehaviour
     {
         Vector3 velocity = CalculatePlatformMovement();
         transform.Translate(velocity, Space.World);
+
+        var guo = new GraphUpdateObject(GetComponent<Collider2D>().bounds);
+        guo.updatePhysics = true;
+        AstarPath.active.UpdateGraphs(guo);
     }
 
     Vector3 CalculatePlatformMovement()

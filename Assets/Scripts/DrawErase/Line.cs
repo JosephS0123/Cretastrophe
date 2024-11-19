@@ -1,5 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
+using Pathfinding;
+using Unity.VisualScripting;
 using UnityEngine;
 
 public class Line : MonoBehaviour
@@ -9,6 +11,7 @@ public class Line : MonoBehaviour
     [SerializeField] public LineRenderer _renderer;
     [SerializeField] private PolygonCollider2D _collider;
     public ChalkManager _chalkManager = null;
+    public GameObject dynamicLineParent;
 
     private readonly List<Vector2> _points = new List<Vector2>();
     void Start()
@@ -55,8 +58,10 @@ public class Line : MonoBehaviour
             verts = ConvexHull.compute(verts);
 
             _collider.points = verts.ToArray();
-            
 
+            var guo = new GraphUpdateObject(_collider.bounds);
+            guo.updatePhysics = true;
+            AstarPath.active.UpdateGraphs(guo);
 
             return true;
 
@@ -82,6 +87,13 @@ public class Line : MonoBehaviour
     public void destroy()
     {
         Destroy(gameObject);
+        if (gameObject.tag == "BlueLine")
+        {
+            if (gameObject.transform.parent.childCount == 1)
+            {
+                Destroy(gameObject.transform.parent.gameObject);
+            }
+        }
     }
 
     private void OnTriggerEnter2D(Collider2D collision)
@@ -89,8 +101,57 @@ public class Line : MonoBehaviour
         // Destroy the item after its collision triggered
         if (collision.gameObject.tag == "Eraser")
         {
+            if(gameObject.tag == "BlueLine")
+            {
+                Transform _parent = gameObject.transform.parent;
+                if(_parent.gameObject.GetComponent<Rigidbody2D>().bodyType == RigidbodyType2D.Kinematic)
+                {
+                    
+                }
+                else if (_parent.childCount == 1)
+                {
+                    Destroy(_parent.gameObject);
+                }
+                else
+                {
+                    GameObject _newParent = Instantiate(dynamicLineParent, gameObject.transform.position, Quaternion.identity, _parent.transform.parent);
+                    List<Transform> children = new List<Transform>();
+                    foreach(Transform child in _parent.transform)
+                    {
+                        children.Add(child);
+                    }
+
+                    bool afterCurrent = false;
+                    foreach (Transform child in children)
+                    {
+                        if (afterCurrent)
+                        {
+                            child.parent = _newParent.transform;
+                        }
+                        if (child.transform == gameObject.transform)
+                        {
+                            afterCurrent = true;
+                        }
+                    }
+                    if (_newParent.transform.childCount == 0)
+                    {
+                        Destroy(_newParent.gameObject);
+                    }
+                    else
+                    {
+                        _newParent.gameObject.GetComponent<Rigidbody2D>().bodyType = RigidbodyType2D.Dynamic;
+                    }
+                    if (_parent.childCount == 1)
+                    {
+                        Destroy(_parent.gameObject);
+                    }
+                }
+
+            }
             _chalkManager.ReplenishChalk(.1f);
             Destroy(gameObject);
+
+            
         }
     }
 

@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using Pathfinding;
 using UnityEngine;
 
 public class PlatformController : RayCastController
@@ -40,6 +41,10 @@ public class PlatformController : RayCastController
         MovePassengers(true);
         transform.Translate(velocity);
         MovePassengers(false);
+
+        var guo = new GraphUpdateObject(collider.bounds);
+        guo.updatePhysics = true;
+        AstarPath.active.UpdateGraphs(guo);
     }
 
     Vector3 CalculatePlatformMovement()

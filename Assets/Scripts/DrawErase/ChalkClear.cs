@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using Pathfinding;
 using UnityEngine;
 
 public class ChalkClear : MonoBehaviour
@@ -19,6 +20,9 @@ public class ChalkClear : MonoBehaviour
     private IEnumerator deleteSelf()
     {
         yield return new WaitForSeconds(.1f);
+        var guo = new GraphUpdateObject(GetComponent<Collider2D>().bounds);
+        guo.updatePhysics = true;
+        AstarPath.active.UpdateGraphs(guo);
         Destroy(gameObject);
         
     }

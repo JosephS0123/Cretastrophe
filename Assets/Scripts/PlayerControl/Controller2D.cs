@@ -119,6 +119,10 @@ public class Controller2D : RayCastController
 
                 collisions.below = directionY == -1;
                 collisions.above = directionY == 1;
+                if(collisions.below && hit.collider.tag == "BlueLine")
+                {
+                    collisions.onIce = true;
+                }
             }
         }
 
@@ -254,6 +258,7 @@ public class Controller2D : RayCastController
         public bool climbingSlope, descendingSlope, slidingDownMaxSlope;
         public float slopeAngle, slopeAngleOld;
         public Vector2 velocityOld;
+        public bool onIce;
 
         public void Reset()
         {
@@ -262,6 +267,7 @@ public class Controller2D : RayCastController
 
             slopeAngleOld = slopeAngle;
             slopeAngle = 0;
+            onIce = false;
         }
     }
     

@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using Pathfinding;
 using UnityEngine;
 
 public class EraseController : MonoBehaviour
@@ -24,13 +25,9 @@ public class EraseController : MonoBehaviour
             nextPos = Vector2.MoveTowards(nextPos, mousePos, Time.deltaTime);
             transform.position = nextPos;
         }
-        //transform.position = mousePos;
+        var guo = new GraphUpdateObject(GetComponent<Collider2D>().bounds);
+        guo.updatePhysics = true;
+        AstarPath.active.UpdateGraphs(guo);
     }
 
-    /*void FixedUpdate()
-    {
-        Vector2 mousePos = _cam.ScreenToWorldPoint(Input.mousePosition);
-        
-        _rb.position = mousePos;
-    }*/
 }

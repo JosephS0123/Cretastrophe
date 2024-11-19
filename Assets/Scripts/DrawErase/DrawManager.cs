@@ -2,6 +2,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using Unity.Burst.CompilerServices;
+using Unity.VisualScripting;
 using UnityEngine;
 
 public class DrawManager : MonoBehaviour
@@ -10,9 +11,11 @@ public class DrawManager : MonoBehaviour
     private Camera _cam;
     [SerializeField] private Line _whiteLinePrefab;
     [SerializeField] private Line _redLinePrefab;
+    [SerializeField] private Line _blueLinePrefab;
     [SerializeField] private GameObject _parent;
     [SerializeField] private ChalkManager _whiteChalkManager;
     [SerializeField] private ChalkManager _redChalkManager;
+    [SerializeField] private ChalkManager _blueChalkManager;
     private ChalkManager _chalkManager;
     private Line _linePrefab;
     public GameObject eraser;
@@ -20,11 +23,14 @@ public class DrawManager : MonoBehaviour
     public GameObject screenClear;
     private GameObject screenClearInstance;
 
-    public LayerMask noDrawMask;
     public const float RESOLUTION = .1f;
     public const float amountChalkUsed = .1f;
 
+    public GameObject dynamicLineParent;
+    private GameObject _currentDynamicParent;
     private Line _currentLine;
+    private Line _prevLine;
+    private bool isDynamic = false;
     void Start()
     {
         _cam = Camera.main;
@@ -41,53 +47,30 @@ public class DrawManager : MonoBehaviour
 
         if(Input.GetMouseButtonDown(0) && canDraw)
         {
-            _currentLine = Instantiate(_linePrefab, mousePos, Quaternion.identity, _parent.transform);
+            if (!isDynamic)
+            {
+                _currentLine = Instantiate(_linePrefab, mousePos, Quaternion.identity, _parent.transform);
+            }
+            else
+            {
+                _currentDynamicParent = Instantiate(dynamicLineParent, mousePos, Quaternion.identity, _parent.transform);
+                _currentLine = Instantiate(_linePrefab, mousePos, Quaternion.identity, _currentDynamicParent.transform);
+            }
             _currentLine._chalkManager = _chalkManager;
             _currentLine.SetPosition(mousePos);
         }
 
         if (Input.GetMouseButton(0))
         {
-            Vector2 nextPos = Vector2.MoveTowards(prevMousePos, mousePos, RESOLUTION);
-
-            if (_currentLine == null && !_chalkManager.isEmpty() && canDraw)
+            if (!isDynamic)
             {
-                _currentLine = Instantiate(_linePrefab, mousePos, Quaternion.identity, _parent.transform);
-                _currentLine._chalkManager = _chalkManager;
-                _currentLine.SetPosition(mousePos);
+                drawStaticLine(mousePos, canDraw);
             }
-
-            while (_currentLine != null && _currentLine.CanAppend(mousePos) && _chalkManager.chalkAmount > 0)
+            else
             {
-                canDraw = drawZoneCheck(nextPos);
-                if (_chalkManager.isEmpty())
-                {
-                    _currentLine.destroy();
-                    break;
-                }
-
-                if (!canDraw)
-                {
-                    nextPos = Vector2.MoveTowards(nextPos, mousePos, RESOLUTION);
-                    _currentLine.destroy();
-                    _currentLine = Instantiate(_linePrefab, nextPos, Quaternion.identity, _parent.transform);
-                    _currentLine._chalkManager = _chalkManager;
-                    _currentLine.SetPosition(nextPos);
-                }
-                else if (_currentLine.SetPosition(nextPos))
-                {
-                    _chalkManager.ReduceChalk(amountChalkUsed);
-                    _currentLine = Instantiate(_linePrefab, nextPos, Quaternion.identity, _parent.transform);
-                    _currentLine._chalkManager = _chalkManager;
-                    _currentLine.SetPosition(nextPos);
-                    nextPos = Vector2.MoveTowards(nextPos, mousePos, RESOLUTION);
-                }
-                else
-                {
-                    nextPos = Vector2.MoveTowards(nextPos, mousePos, RESOLUTION);
-                }
-                
+                drawDynamicLine(mousePos, canDraw);
             }
+            
         }
         else if (Input.GetMouseButtonDown(1))
         {
@@ -98,10 +81,15 @@ public class DrawManager : MonoBehaviour
         {
             if(_currentLine != null)
             {
+                if(isDynamic)
+                {
+                    _currentDynamicParent.GetComponent<Rigidbody2D>().bodyType = RigidbodyType2D.Dynamic;
+                }
                 _currentLine.destroy();
             }
         }
-        else if (Input.GetMouseButtonUp(1))
+        
+        if (Input.GetMouseButtonUp(1))
         {
             Destroy(eraserInstance);
         }
@@ -113,15 +101,38 @@ public class DrawManager : MonoBehaviour
             if(_currentLine != null && Input.GetMouseButton(0))
             {
                 _currentLine.destroy();
+                if (isDynamic)
+                {
+                    _currentDynamicParent.GetComponent<Rigidbody2D>().bodyType = RigidbodyType2D.Dynamic;
+                }
                 _currentLine = Instantiate(_linePrefab, mousePos, Quaternion.identity, _parent.transform);
                 _currentLine._chalkManager = _chalkManager;
                 _currentLine.SetPosition(mousePos);
             }
+            isDynamic = false;
         }
         else if(Input.GetKeyDown("2"))
         {
             _linePrefab = _redLinePrefab;
             _chalkManager = _redChalkManager;
+            if (_currentLine != null && Input.GetMouseButton(0))
+            {
+                _currentLine.destroy();
+                if (isDynamic)
+                {
+                    _currentDynamicParent.GetComponent<Rigidbody2D>().bodyType = RigidbodyType2D.Dynamic;
+                }
+                _currentLine = Instantiate(_linePrefab, mousePos, Quaternion.identity, _parent.transform);
+                _currentLine._chalkManager = _chalkManager;
+                _currentLine.SetPosition(mousePos);
+            }
+            isDynamic = false;
+        }
+        else if (Input.GetKeyDown("3"))
+        {
+            _linePrefab = _blueLinePrefab;
+            _chalkManager = _blueChalkManager;
+            isDynamic = true;
             if (_currentLine != null && Input.GetMouseButton(0))
             {
                 _currentLine.destroy();
@@ -131,7 +142,7 @@ public class DrawManager : MonoBehaviour
             }
         }
 
-        if(Input.GetKeyDown("e"))
+        if (Input.GetKeyDown("e"))
         {
             chalkClear();
         }
@@ -140,6 +151,101 @@ public class DrawManager : MonoBehaviour
 
         prevMousePos = mousePos;
     }
+
+    private void drawStaticLine(Vector2 mousePos, bool canDraw)
+    {
+        Vector2 nextPos = Vector2.MoveTowards(prevMousePos, mousePos, RESOLUTION);
+
+        if (_currentLine == null && !_chalkManager.isEmpty() && canDraw)
+        {
+            _currentLine = Instantiate(_linePrefab, mousePos, Quaternion.identity, _parent.transform);
+            _currentLine._chalkManager = _chalkManager;
+            _currentLine.SetPosition(mousePos);
+        }
+
+        while (_currentLine != null && _currentLine.CanAppend(mousePos) && _chalkManager.chalkAmount > 0)
+        {
+            canDraw = drawZoneCheck(nextPos);
+            if (_chalkManager.isEmpty())
+            {
+                _currentLine.destroy();
+                break;
+            }
+
+            if (!canDraw)
+            {
+                nextPos = Vector2.MoveTowards(nextPos, mousePos, RESOLUTION);
+                _currentLine.destroy();
+                _currentLine = Instantiate(_linePrefab, nextPos, Quaternion.identity, _parent.transform);
+                _currentLine._chalkManager = _chalkManager;
+                _currentLine.SetPosition(nextPos);
+            }
+            else if (_currentLine.SetPosition(nextPos))
+            {
+                _chalkManager.ReduceChalk(amountChalkUsed);
+                _currentLine = Instantiate(_linePrefab, nextPos, Quaternion.identity, _parent.transform);
+                _currentLine._chalkManager = _chalkManager;
+                _currentLine.SetPosition(nextPos);
+                nextPos = Vector2.MoveTowards(nextPos, mousePos, RESOLUTION);
+            }
+            else
+            {
+                nextPos = Vector2.MoveTowards(nextPos, mousePos, RESOLUTION);
+            }
+
+        }
+    }
+
+    private void drawDynamicLine(Vector2 mousePos, bool canDraw)
+    {
+        Vector2 nextPos = Vector2.MoveTowards(prevMousePos, mousePos, RESOLUTION);
+
+        if (_currentLine == null && !_chalkManager.isEmpty() && canDraw)
+        {
+            _currentDynamicParent = Instantiate(dynamicLineParent, mousePos, Quaternion.identity, _parent.transform);
+            _currentLine = Instantiate(_linePrefab, mousePos, Quaternion.identity, _currentDynamicParent.transform);
+            _currentLine._chalkManager = _chalkManager;
+            _currentLine.SetPosition(mousePos);
+        }
+
+        while (_currentLine != null && _currentLine.CanAppend(mousePos) && _chalkManager.chalkAmount > 0)
+        {
+            canDraw = drawZoneCheck(nextPos);
+            if (_chalkManager.isEmpty())
+            {
+                _currentLine.destroy();
+                _currentDynamicParent.GetComponent<Rigidbody2D>().bodyType = RigidbodyType2D.Dynamic;
+                break;
+            }
+
+            if (!canDraw)
+            {
+                nextPos = Vector2.MoveTowards(nextPos, mousePos, RESOLUTION);
+                _currentLine.destroy();
+                _currentDynamicParent.GetComponent<Rigidbody2D>().bodyType = RigidbodyType2D.Dynamic;
+
+                _currentDynamicParent = Instantiate(dynamicLineParent, mousePos, Quaternion.identity, _parent.transform);
+                _currentLine = Instantiate(_linePrefab, nextPos, Quaternion.identity, _currentDynamicParent.transform);
+                _currentLine._chalkManager = _chalkManager;
+                _currentLine.SetPosition(nextPos);
+            }
+            else if (_currentLine.SetPosition(nextPos))
+            {
+                _chalkManager.ReduceChalk(amountChalkUsed);
+
+                _currentLine = Instantiate(_linePrefab, nextPos, Quaternion.identity, _currentDynamicParent.transform);
+                _currentLine._chalkManager = _chalkManager;
+                _currentLine.SetPosition(nextPos);
+                nextPos = Vector2.MoveTowards(nextPos, mousePos, RESOLUTION);
+            }
+            else
+            {
+                nextPos = Vector2.MoveTowards(nextPos, mousePos, RESOLUTION);
+            }
+
+        }
+    }
+
 
     private bool drawZoneCheck(Vector2 curPos)
     {

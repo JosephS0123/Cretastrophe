@@ -6,14 +6,15 @@ using UnityEngine;
 [RequireComponent(typeof(Controller2D))]
 public class Player : MonoBehaviour
 {
-    //public float jumpHeight = 4;
-    //public float timeToJumpApex = .4f;
-    
     public float gravity = -25;
+    float maxVelocityY = 15;
+    float fallMultiplier = 1.15f;
 
-    float accelerationTimeAirborne = .1f;
+    float accelerationTimeAirborne = .15f;
     float accelerationTimeGrounded = .05f;
+    float accelerationTimeIcy = .3f;
     float moveSpeed = 6;
+    float moveSpeedIce = 8;
 
     float baseVelocity = 6;
     float holdAcceleration = 25;
@@ -150,13 +151,31 @@ public class Player : MonoBehaviour
             jumping = false;
         }
 
-        float targetVelocityX = input.x * moveSpeed;
-        velocity.x = Mathf.SmoothDamp(velocity.x, targetVelocityX, ref velocityXSmoothing, (controller.collisions.below)?accelerationTimeGrounded:accelerationTimeAirborne);
+        float targetVelocityX = input.x * ((controller.collisions.onIce) ? moveSpeedIce : moveSpeed);
+        float smoothTime;
+        if (controller.collisions.below)
+        {
+            smoothTime = (controller.collisions.onIce) ? accelerationTimeIcy : accelerationTimeGrounded;
+        }
+        else
+        {
+            smoothTime = accelerationTimeAirborne;
+        }
+        velocity.x = Mathf.SmoothDamp(velocity.x, targetVelocityX, ref velocityXSmoothing, smoothTime);
         if ((controller.collisions.left || controller.collisions.right) && !jumping)
         {
             velocity.x = 0;
         }
-        velocity.y += gravity * Time.deltaTime;
+        if (velocity.y <= 0)
+        {
+            velocity.y += gravity * fallMultiplier * Time.deltaTime;
+        }
+        else if(velocity.y > 0)
+        {
+            velocity.y += gravity * Time.deltaTime;
+        }
+        //velocity.y += gravity * Time.deltaTime;
+        velocity.y = Mathf.Clamp(velocity.y, -maxVelocityY, maxVelocityY);
         controller.Move(velocity * Time.deltaTime, input);
         //Physics.SyncTransforms();
     }
