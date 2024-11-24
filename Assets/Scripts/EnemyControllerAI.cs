@@ -1,10 +1,13 @@
+using System;
 using Unity.VisualScripting;
 using UnityEngine;
-// using Pathfinding;
 
 /*
-expect a DYNAMIC body type
-and continuous collision detection
+    expect a DYNAMIC body type
+    and continuous collision detection
+
+    PLEASE make all enemies face left to begin with a rotation about y = 0
+        that is an assumption the code makes
 */
 public class EnemyControllerAI : MonoBehaviour
 {
@@ -27,15 +30,21 @@ public class EnemyControllerAI : MonoBehaviour
     public StateType defaultStateCombatType = StateType.combatStill;
     public PlayerSearchType searchType;
     public ViewType enemyViewType = ViewType.constant;
+    public Projectile.projectileType projectileType = Projectile.projectileType.spike; /*TODO: assign to init func*/
     private ShootProjectiles projectiles;
+    public ShootProjectiles.shootingDensity sDensity= ShootProjectiles.shootingDensity.constant;
+    public ShootProjectiles.shootingFrequency sFreq = ShootProjectiles.shootingFrequency.constant;
+    public ShootProjectiles.shootingType sType = ShootProjectiles.shootingType.semicircleSpread;
+
     public int projectileCount = 1;
     public float projectileSpeed = 6f;
-    public float playerDetectRadius = 3f;
+    public float playerDetectRadius = 3.5f;
+    public float enemyFireRate = 3.5f;
+    public String prefabName = "Projectile";
     public float viewCone = 45f; // Enemies FOV +- viewcone/2
-    private float actualViewCone;
     public float lookDirectionAngle = 25f; // the point where the enemy is looking 
     private float actualLookDirectionAngle;
-    public int aggroFrameTime = 5; // Allow enemy to remain aggroed for N frames
+    public int aggroFrameTime = 15; // Allow enemy to remain aggroed for N frames
     private int aggroFrameTimeRemaining; // Counter of frames left, reset upon reaggro
 
     /* Positioning Related Info */
@@ -72,6 +81,16 @@ public class EnemyControllerAI : MonoBehaviour
     private Vector3 prevPrevPos;
     private bool prevLookingRight;
     private bool prevPrevLookingRight;
+
+    /* debug flags 
+        0 = no console logs    
+        1 = print movetypes (the type of movement enemy should make, e.g. straight, reverse, jump...)
+        2 = print movement check gizmos
+        3 = 1 & 2
+        4 = LOS detection
+        10 = everything
+    */
+    public int debugCode = 0; 
     
     /* or should be an Awake() method? */
     void Start()
@@ -95,18 +114,20 @@ public class EnemyControllerAI : MonoBehaviour
         playerWidth = playerBoxCollider.size.x;
         playerHeight = playerBoxCollider.size.y;
 
-        actualViewCone = viewCone;
         aggroFrameTimeRemaining = aggroFrameTime;
         actualLookDirectionAngle = lookDirectionAngle;
 
         projectiles = gameObject.AddComponent<ShootProjectiles>();
-        projectiles.setProjectileCount(projectileCount, "Projectile", projectileSpeed);
+        // projectiles.setProjectileCount(projectileCount, "Projectile", projectileSpeed);
+        projectiles.setProjectileEnums(sFreq, sType, projectileType, sDensity);
+        projectiles.setProjectileBehavior(enemyFireRate, projectileCount, projectileSpeed, prefabName);
 
         switch (searchType) {
             case PlayerSearchType.colliderSphere:
                 InstantiateCircleCollider(playerDetectRadius, Vector2.zero, true);
                 break;
             case PlayerSearchType.lineOfSight:
+                /* Do nothing */
                 break;
             case PlayerSearchType.onContact:
                 break;
@@ -122,7 +143,7 @@ public class EnemyControllerAI : MonoBehaviour
         prevPos = transform.position - new Vector3(1f, 1f, 0);
         prevPrevPos = prevPos - new Vector3(5f, 5f, 0);
         prevLookingRight = !isFacingRight;
-        prevPrevLookingRight = prevLookingRight;
+        prevPrevLookingRight = !prevLookingRight;
     }
 
     // debugging 
@@ -158,7 +179,10 @@ public class EnemyControllerAI : MonoBehaviour
     /*currently updates 50 FPS per editor default*/
     public void FixedUpdate()
     {
-       checkState();
+        checkState();
+        if (debugCode == 1) {
+            printMovetype();
+        }
     }
 
 
@@ -252,12 +276,16 @@ public class EnemyControllerAI : MonoBehaviour
     {
         // Ensure that it doesn't make hasty decision that it "is" stuck 
         // and reduces the amount of positions to be stored to make checks
-        if (IsStuck()) {
+        if (statetype != defaultStateCombatType && IsStuck()) {
             if (stuckCounter > 12 ) {
-                if (!IsWallAhead() && !IsGapAhead() && !IsUnsafeGap()) {
-                    movetype = MoveType.straight;
-                } else {
-                    movetype = MoveType.reverse;
+                if (!IsWallAhead()) {
+                    if (IsGapAhead() && !IsUnsafeGap()) {
+                        movetype = MoveType.straight;
+                        stuckCounter = 0;
+                    } else {
+                        movetype = MoveType.reverse;
+                        stuckCounter = 0;
+                    }
                 }
             }
             /* Breaks enemy movement, unsure if possible to currently implement */
@@ -359,45 +387,47 @@ public class EnemyControllerAI : MonoBehaviour
         
     }
 
-    /* Check for obstacle ahead of entity */
+    /* Check for obstacle immediately ahead of entity */
     bool IsWallAhead()
     {
         float horizRayLength = 0.1f; 
-        float vertRayLength = enemyHeight; // Length of the vertical ray + 5% error
+        float vertRayLength = enemyHeight;
+        Vector2 currentPos = transform.position;
 
         // Calculate offsets for ray start points
-        float yOffsetTop = enemyHeight / 2; // Just below the top edge
-        float yOffsetBottom = -enemyHeight / 2; // Just above the bottom edge
-        float xOffset = enemyWidth / 2f * (isFacingRight ? 1 : -1);
+        float offsetTopY = enemyHeight / 2; 
+        float offsetBottomY = -enemyHeight / 2; 
+        float offsetAheadX = enemyWidth / 2f * (isFacingRight ? 1 : -1); // determines if ray starts on left/right side of enemy
 
-        // Calculate ray origins based on the enemy's position and facing direction
-        Vector2 topRayOrigin = (Vector2)transform.position + new Vector2(xOffset, yOffsetTop);
-        Vector2 bottomRayOrigin = (Vector2)transform.position + new Vector2(xOffset, yOffsetBottom);
-        Vector2 centerRayOrigin = (Vector2)transform.position + new Vector2(xOffset, 0);
-        Vector2 verticalRayOrigin = (Vector2)transform.position + new Vector2(lookDirection.x * (enemyWidth / 2 * 1.2f), -enemyHeight/2); // Bottom edge of vertical ray
+        // Calculate ray origins for horizontal probes for walls
+        Vector2 topRayOrigin = currentPos + new Vector2(offsetAheadX, offsetTopY);
+        Vector2 bottomRayOrigin = currentPos + new Vector2(offsetAheadX, offsetBottomY);
+        Vector2 centerRayOrigin = currentPos + new Vector2(offsetAheadX, 0);
+        Vector2 verticalRayOrigin = currentPos + new Vector2(lookDirection.x * (enemyWidth / 2 * 1.2f), -enemyHeight/2); // Bottom edge of vertical ray
 
         RaycastHit2D topHit = Physics2D.Raycast(topRayOrigin, lookDirection, horizRayLength, groundLayer);
         RaycastHit2D bottomHit = Physics2D.Raycast(bottomRayOrigin, lookDirection, horizRayLength, groundLayer);
         RaycastHit2D centerHit = Physics2D.Raycast(centerRayOrigin, lookDirection, horizRayLength, groundLayer);
-        
-        // Cast vertical ray from center to top
         RaycastHit2D verticalHit = Physics2D.Raycast(verticalRayOrigin, Vector2.up, vertRayLength, groundLayer);
 
         // Draw the rays for debugging
         Color rayColor = Color.red; // Color for horizontal rays
-        // if (topHit) {
-            Debug.DrawRay(topRayOrigin, lookDirection * horizRayLength, rayColor);
-        // }
-        // if (centerHit) {
-            Debug.DrawRay(centerRayOrigin, lookDirection * horizRayLength, rayColor);
-        // }
-        // if (bottomHit) {
-            Debug.DrawRay(bottomRayOrigin, lookDirection * horizRayLength, rayColor);
-        // }
-        // if (verticalHit) {
-            Debug.DrawRay(verticalRayOrigin, Vector2.up * vertRayLength, Color.red); // Debug for vertical ray
-            // return true;
-        // }
+
+        if (debugCode == 2 || debugCode == 3) {
+            if (topHit) {
+                Debug.DrawRay(topRayOrigin, lookDirection * horizRayLength, rayColor);
+            }
+            if (centerHit) {
+                Debug.DrawRay(centerRayOrigin, lookDirection * horizRayLength, rayColor);
+            }
+            if (bottomHit) {
+                Debug.DrawRay(bottomRayOrigin, lookDirection * horizRayLength, rayColor);
+            }
+            if (verticalHit) {
+                Debug.DrawRay(verticalRayOrigin, Vector2.up * vertRayLength, rayColor); 
+                return true;
+            }
+        }
 
         // Count how many raycasts hit something
         int hitCount = 0;
@@ -481,8 +511,8 @@ public class EnemyControllerAI : MonoBehaviour
     void SetLookDirection() 
     {
         // Check the rotation of the enemy to set the look direction
-        lookDirection = transform.rotation.x < 180f ? Vector2.right : Vector2.left;
-        isFacingRight = transform.rotation.x < 180f;
+        lookDirection = transform.rotation.y > 0f ? Vector2.right : Vector2.left;
+        isFacingRight = transform.rotation.y > 0f; /* used to be "< 180f" ; default look direction should be left*/
     }
 
     /* Uses some dynamic raycasting to predict valid jump spots, if none then fail to jump */
@@ -557,7 +587,7 @@ public class EnemyControllerAI : MonoBehaviour
     // RNG, not much use 
     bool rollDice(float successPercentRate)
     {
-        return Random.Range(0f, 1f) < successPercentRate;
+        return UnityEngine.Random.Range(0f, 1f) < successPercentRate;
     }
 
     /* checks previous 2 frames + current to see if enemy is "possibly stuck" */
@@ -565,7 +595,7 @@ public class EnemyControllerAI : MonoBehaviour
     {
         if (prevPrevPos == prevPos && prevPos == transform.position) 
         {
-            if (prevPrevLookingRight == prevLookingRight && prevLookingRight== isFacingRight) {
+            if (prevPrevLookingRight == prevLookingRight && prevLookingRight == isFacingRight) {
                 print("IS STUCK\n\n\n");
                 stuckCounter++;
                 return true;
@@ -590,18 +620,12 @@ public class EnemyControllerAI : MonoBehaviour
         isFacingRight = !isFacingRight;
         lookDirection.x = -lookDirection.x;
 
-        if (lookDirection.x > 0) {
-            actualViewCone = viewCone;
-            actualLookDirectionAngle = lookDirectionAngle;
-        } else {
-            actualViewCone = 180 - viewCone;
-            actualLookDirectionAngle = 180 - lookDirectionAngle;
-        }
-
-        if (transform.rotation.x <= 180.0f) {
+        if (isFacingRight) {
             transform.Rotate(0f, -180f, 0f);
-        } else {
+            actualLookDirectionAngle = lookDirectionAngle;
+        } else { /* NOTE: default look is left */
             transform.Rotate(0f, 180f, 0f);
+            actualLookDirectionAngle = 180 - lookDirectionAngle;
         }
     }
 
@@ -690,42 +714,58 @@ public class EnemyControllerAI : MonoBehaviour
         return distance <= radius;
     }
 
-    // more linea albegra AGGGGG!! 
+    // more linea albegra AGGGGG!!
+    // Assumes the player position has been updated prior to call
     bool isValidLOS()
     {
-        Vector3 bottomCornerPos = player.transform.position + (lookDirection.x > 0 ? new Vector3(playerWidth/2, -playerHeight/2, 0) : new Vector3(-playerWidth/2, -playerHeight/2, 0));
-        Vector3 centerPos = player.transform.position;
-        Vector3 topCornerPos = player.transform.position + (lookDirection.x > 0 ? new Vector3(-playerWidth/2, playerHeight/2, 0) : new Vector3(playerWidth/2, playerHeight/2, 0));
+        Vector3 playerPos = player.transform.position;
+        bool inverseCorners = actualLookDirectionAngle < 0 && (playerPos.y < transform.position.y - enemyHeight/2f) ? true : false;
+        /* generate 3 rays at the furthest visible* corner of the player that is visible from perspective of enemy */
+        /* 
+            if player is right of enemy -> get bottomRight corner and topLeft corner 
+            else if player is left of enemy -> get bottomLeft corner and topRight corner
 
-        bool bottomCorner = IsPlayerInLOS(actualLookDirectionAngle, actualViewCone, bottomCornerPos);
-        bool center = IsPlayerInLOS(actualLookDirectionAngle, actualViewCone, centerPos);
-        bool topCorner = IsPlayerInLOS(actualLookDirectionAngle, actualViewCone, topCornerPos);
+            IF player is beneath the enemy and enemy has LOS, invert the above
+        */
 
-        if (bottomCorner) {
-            if (CastRayToTarget(bottomCornerPos)) {
-                DrawRay((Vector2)transform.position, actualLookDirectionAngle);
-                return true;
+        Vector3 bottomCornerPos = playerPos + (!inverseCorners && isFacingRight ? new Vector3(playerWidth/2f, -playerHeight/2f, 0) : new Vector3(-playerWidth/2, -playerHeight/2, 0));
+        Vector3 centerPos = playerPos;
+        Vector3 topCornerPos = playerPos + (!inverseCorners && isFacingRight ? new Vector3(-playerWidth/2f, playerHeight/2f, 0) : new Vector3(playerWidth/2, playerHeight/2, 0));
+
+        bool bottomCorner = IsPlayerInLOS(actualLookDirectionAngle, viewCone, bottomCornerPos);
+        bool center = IsPlayerInLOS(actualLookDirectionAngle, viewCone, centerPos);
+        bool topCorner = IsPlayerInLOS(actualLookDirectionAngle, viewCone, topCornerPos);
+
+        Vector3 directionToPlayer = (playerPosition - transform.position).normalized;
+        float angleInRadians = Mathf.Atan2(directionToPlayer.y, directionToPlayer.x);
+
+        bool drawContactRays = (debugCode == 4) || (debugCode == 10)  ? true : false;
+
+        if (bottomCorner && CastRayToTarget(bottomCornerPos)) {
+            if (drawContactRays) {
+                drawRayToPlayer((Vector2)transform.position, angleInRadians);                
             }
-        } if (center) {
-            if (CastRayToTarget(centerPos)) {
-                DrawRay((Vector2)transform.position, actualLookDirectionAngle);
-                return true;
+            return true;
+        } 
+        if (center && CastRayToTarget(centerPos)) {
+            if (drawContactRays) {
+                drawRayToPlayer((Vector2)transform.position, angleInRadians);                
             }
-        } if (topCorner) {
-            if (CastRayToTarget(topCornerPos)) {
-                DrawRay((Vector2)transform.position, actualLookDirectionAngle);   
-                return true;
+            return true;
+        } 
+        if (topCorner && CastRayToTarget(topCornerPos)) {
+            if (drawContactRays) {
+                drawRayToPlayer((Vector2)transform.position, angleInRadians);                   
             }
+            return true;
         }
         return false;
     }
 
     // Shorthand to draw rays from enemy to player
-    void DrawRay(Vector2 origin, float angle)
+    void drawRayToPlayer(Vector2 origin, float angleInRad)
     {
-        float angleInRadians = angle * Mathf.Deg2Rad;
-
-        Vector2 direction = new Vector2(Mathf.Cos(angleInRadians), Mathf.Sin(angleInRadians));
+        Vector2 direction = new Vector2(Mathf.Cos(angleInRad), Mathf.Sin(angleInRad));
 
         float rayLength = Vector2.Distance(transform.position, playerPosition);
         Vector2 endPoint = origin + direction * rayLength;
@@ -733,13 +773,14 @@ public class EnemyControllerAI : MonoBehaviour
         Debug.DrawLine(origin, endPoint, Color.red); 
     }
 
+    // Checks if the LOS is valid and unobstructed by obstacles
     bool CastRayToTarget(Vector3 targetPoint)
     {
-        Vector2 startPos = transform.position;
+        Vector2 enemyPos = transform.position;
 
         // Calculate the direction from the current object to the target point
         Vector2 direction = (targetPoint - transform.position).normalized;
-        RaycastHit2D hit = Physics2D.Raycast(startPos, direction, Mathf.Infinity, groundLayer | playerLayer);
+        RaycastHit2D hit = Physics2D.Raycast(enemyPos, direction, playerDetectRadius, groundLayer | playerLayer);
 
         // Check if the ray hit something
         if (hit.collider != null)
@@ -748,20 +789,19 @@ public class EnemyControllerAI : MonoBehaviour
             if (((1 << hit.collider.gameObject.layer) & groundLayer) != 0)
             {
                 // Debug.Log("Hit an obstacle: " + hit.collider.gameObject.name);
-                // Debug.DrawLine(startPos, hit.point, Color.red, 1f); 
+                // Debug.DrawLine(enemyPos, hit.point, Color.red, 1f); 
                 return false; 
             }
             else if (((1 << hit.collider.gameObject.layer) & playerLayer) != 0)
             {
-                // Debug.Log("Hit the player: " + hit.collider.gameObject.name);
-                // Debug.DrawLine(startPos, hit.point, Color.blue, 1f);
+                Debug.Log("Player in LOS: " + hit.collider.gameObject.name);
+                // Debug.DrawLine(enemyPos, hit.point, Color.blue, 1f);
                 return true; 
             }
         }
         else
         {
-            Debug.Log("Ray did not hit anything.");
-            Debug.DrawLine(startPos, startPos + direction * Vector2.Distance(transform.position, playerPosition), Color.green, 1f); 
+            // Debug.Log("Ray did not hit anything.");
         }
 
         return false; 
@@ -772,23 +812,21 @@ public class EnemyControllerAI : MonoBehaviour
     {
         float lookDirectionX = Mathf.Cos(lookDirectionAngle * Mathf.Deg2Rad);
         float lookDirectionY = Mathf.Sin(lookDirectionAngle * Mathf.Deg2Rad);
-        Vector3 lookDirection = new Vector3(lookDirectionX, lookDirectionY, 0).normalized; // 2D look direction in the x-y plane
-
+        Vector3 lookDirection = new Vector3(lookDirectionX, lookDirectionY, 0).normalized; 
         Vector3 viewerPosition = transform.position + new Vector3(this.lookDirection.x * enemyWidth/2f, enemyHeight/4f, 0);
 
         playerPosition.z = 0;
         viewerPosition.z = 0;
         
-        // Calculate the vector from the viewer to the Player (2D)
-        Vector3 toPlayer = (playerPosition - viewerPosition).normalized;
+        // get direction to player
+        Vector3 dirToPlayer = (playerPosition - viewerPosition).normalized;
 
-        // Calculate the dot product between the normalized look direction and the vector to the Player
-        float dotProduct = Vector3.Dot(lookDirection, toPlayer);
+        float dotProduct = Vector3.Dot(lookDirection, dirToPlayer);
 
-        // Calculate the cosine of half the field of view angle
+        // see if player within bounds of enemy's sight
         float maxDot = Mathf.Cos(viewConeAngle * 0.5f * Mathf.Deg2Rad);
 
-        // Check if the dot product is within the acceptable range (i.e., within the field of view)
+        // Check if the dot product is within the field of view
         return dotProduct >= maxDot;
     }
 
