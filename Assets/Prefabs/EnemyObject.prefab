@@ -112,14 +112,14 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 8587186825617489101}
   serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 1, z: 0, w: 0}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: -0.9266, y: -0.9518, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 3477121365709809747}
   m_Father: {fileID: 0}
-  m_LocalEulerAnglesHint: {x: 0, y: 180, z: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!50 &1269891314374731718
 Rigidbody2D:
   serializedVersion: 4
@@ -239,12 +239,29 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0b712a8ed2b7bbc27bd4683db25060a0, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  defaultStateMobileType: 2
+  defaultStateCombatType: 1
+  searchType: 0
+  enemyViewType: 0
+  projectileType: 0
+  sDensity: 0
+  sFreq: 0
+  sType: 3
+  projectileCount: 5
+  projectileSpeed: 6
+  playerDetectRadius: 4.5
+  enemyFireRate: 5
+  prefabName: Projectile
+  viewCone: 45
+  lookDirectionAngle: 25
+  aggroFrameTime: 10
+  groundLayer:
+    serializedVersion: 2
+    m_Bits: 512
   playerLayer:
     serializedVersion: 2
     m_Bits: 256
   moveSpeed: 2.5
   jumpForce: 7
   hopForce: 1
-  groundLayer:
-    serializedVersion: 2
-    m_Bits: 512
+  debugCode: 0
