@@ -12,6 +12,7 @@ GameObject:
   - component: {fileID: 3298018491865711787}
   - component: {fileID: 8606305086813347404}
   - component: {fileID: -1413437510291691422}
+  - component: {fileID: 7471062379301215897}
   m_Layer: 0
   m_Name: eraserObject
   m_TagString: Eraser
@@ -157,4 +158,21 @@ Rigidbody2D:
   m_Interpolate: 0
   m_SleepingMode: 1
   m_CollisionDetection: 0
-  m_Constraints: 0
+  m_Constraints: 2
+--- !u!114 &7471062379301215897
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3316404867521515364}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 893f1673a9c0b33418c6bd2ce13913bf, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  localWaypoints:
+  - {x: 0, y: 0, z: 0}
+  - {x: 1, y: 0, z: 0}
+  speed: 1
+  cyclic: 0

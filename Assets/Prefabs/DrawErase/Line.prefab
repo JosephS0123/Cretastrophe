@@ -13,7 +13,7 @@ GameObject:
   - component: {fileID: 1120676243342914910}
   - component: {fileID: -958014405256141648}
   - component: {fileID: 811067412982144122}
-  m_Layer: 9
+  m_Layer: 7
   m_Name: Line
   m_TagString: White
   m_Icon: {fileID: 0}
@@ -50,6 +50,7 @@ MonoBehaviour:
   _renderer: {fileID: 1120676243342914910}
   _collider: {fileID: -958014405256141648}
   _chalkManager: {fileID: 0}
+  dynamicLineParent: {fileID: 0}
 --- !u!120 &1120676243342914910
 LineRenderer:
   serializedVersion: 2
@@ -149,7 +150,7 @@ LineRenderer:
     shadowBias: 0.5
     generateLightingData: 0
   m_MaskInteraction: 0
-  m_UseWorldSpace: 1
+  m_UseWorldSpace: 0
   m_Loop: 0
   m_ApplyActiveColorSpace: 1
 --- !u!60 &-958014405256141648

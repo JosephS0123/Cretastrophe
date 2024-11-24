@@ -16,11 +16,14 @@ public class Line : MonoBehaviour
     private readonly List<Vector2> _points = new List<Vector2>();
     void Start()
     {
-        _collider.transform.position -= transform.position;
+        //transform.position -= transform.position;
     }
 
-    public bool SetPosition(Vector2 pos)
+    public bool SetPosition(Vector2 _pos)
     {
+        Vector2 pos = Vector2.zero;
+        pos.x = _pos.x - transform.position.x;
+        pos.y = _pos.y - transform.position.y;
         if (!CanAppend(pos)) return false;
 
         
@@ -80,6 +83,20 @@ public class Line : MonoBehaviour
         {
             return true;
         }
+
+        return Vector2.Distance(_renderer.GetPosition(_renderer.positionCount - 1), pos) > DrawManager.RESOLUTION;
+    }
+
+    public bool CanAppendWorldSpace(Vector2 _pos)
+    {
+        if (_renderer.positionCount == 0)
+        {
+            return true;
+        }
+
+        Vector2 pos = Vector2.zero;
+        pos.x = _pos.x - transform.position.x;
+        pos.y = _pos.y - transform.position.y;
 
         return Vector2.Distance(_renderer.GetPosition(_renderer.positionCount - 1), pos) > DrawManager.RESOLUTION;
     }

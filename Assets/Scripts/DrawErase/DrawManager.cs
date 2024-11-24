@@ -163,7 +163,7 @@ public class DrawManager : MonoBehaviour
             _currentLine.SetPosition(mousePos);
         }
 
-        while (_currentLine != null && _currentLine.CanAppend(mousePos) && _chalkManager.chalkAmount > 0)
+        while (_currentLine != null && _currentLine.CanAppendWorldSpace(mousePos) && _chalkManager.chalkAmount > 0)
         {
             canDraw = drawZoneCheck(nextPos);
             if (_chalkManager.isEmpty())
@@ -208,7 +208,7 @@ public class DrawManager : MonoBehaviour
             _currentLine.SetPosition(mousePos);
         }
 
-        while (_currentLine != null && _currentLine.CanAppend(mousePos) && _chalkManager.chalkAmount > 0)
+        while (_currentLine != null && _currentLine.CanAppendWorldSpace(mousePos) && _chalkManager.chalkAmount > 0)
         {
             canDraw = drawZoneCheck(nextPos);
             if (_chalkManager.isEmpty())

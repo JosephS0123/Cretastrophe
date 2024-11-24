@@ -5,6 +5,8 @@ using UnityEngine;
 
 public class MovingObject : MonoBehaviour
 {
+    Collider2D _collider;
+
     public Vector3[] localWaypoints;
     Vector3[] globalWaypoints;
 
@@ -20,6 +22,7 @@ public class MovingObject : MonoBehaviour
         {
             globalWaypoints[i] = localWaypoints[i] + transform.position;
         }
+        _collider = GetComponent<Collider2D>();
     }
 
     
@@ -28,7 +31,7 @@ public class MovingObject : MonoBehaviour
         Vector3 velocity = CalculatePlatformMovement();
         transform.Translate(velocity, Space.World);
 
-        var guo = new GraphUpdateObject(GetComponent<Collider2D>().bounds);
+        var guo = new GraphUpdateObject(_collider.bounds);
         guo.updatePhysics = true;
         AstarPath.active.UpdateGraphs(guo);
     }

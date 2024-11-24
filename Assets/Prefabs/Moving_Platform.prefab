@@ -105,9 +105,11 @@ MonoBehaviour:
   passengerMask:
     serializedVersion: 2
     m_Bits: 256
-  move: {x: 0, y: 0, z: 0}
   localWaypoints:
   - {x: 0, y: 0, z: 0}
+  - {x: 1, y: 0, z: 0}
+  speed: 0
+  cyclic: 0
 --- !u!50 &6948076204733130591
 Rigidbody2D:
   serializedVersion: 4
