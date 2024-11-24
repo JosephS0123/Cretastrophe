@@ -29,8 +29,8 @@ public class ShootProjectiles : MonoBehaviour
     private float fireRateDelta = 1f; // how much to increase/decrease shoot speed per shot
     public float maxFireRate = .4f; // cant shoot faster than 1 shot every .4 sec 
     public float minFireRate = 5f;
-    private bool isIncreasingFirerate;
 
+    // the max spread for a volley of projectiles (in degrees)
     private float getVolleyAngle()
     {
         if (sType == shootingType.narrowSpread) {
@@ -38,22 +38,27 @@ public class ShootProjectiles : MonoBehaviour
         } else if (sType == shootingType.widespread) {
             return 65f;
         }else if (sType == shootingType.semicircleSpread) {
-            return 140f;
+            return 180f;
         }
         return 0f;
     }
 
 
+    // Used for any shotgun-based attack
     private void assignLaunchAngles()
     {
         if (!randomSpread) 
         {
             float angleBetweenShots = getVolleyAngle() / projectileCt;
-            float angleStartPoint = sType == shootingType.semicircleSpread ? 20f : (sType == shootingType.widespread) ? 12.5f : 25f;
+            float angleStartPoint = sType == shootingType.semicircleSpread ? 0f : (sType == shootingType.widespread) ? 0f : 0f;
+            float angleEndpoint = angleStartPoint + getVolleyAngle();
 
+            // oscillate between start and end and converge towards the center when creating shotguns
             for (int i = 0; i < projectileCt; i++) {
-                directions[i] = angleStartPoint + i * angleBetweenShots;
+                directions[i] = ((i%2 != 0) ? angleEndpoint : angleStartPoint)
+                                + ((i%2==0) ? i/2 * angleBetweenShots : -i/2 * angleBetweenShots);
             }
+
         } else {
             /* assign random spread */
         }

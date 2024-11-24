@@ -37,7 +37,7 @@ public class EnemyControllerAI : MonoBehaviour
     public ShootProjectiles.shootingType sType = ShootProjectiles.shootingType.semicircleSpread;
 
     public int projectileCount = 1;
-    public float projectileSpeed = 6f;
+    public float projectileSpeed = 1f;
     public float playerDetectRadius = 3.5f;
     public float enemyFireRate = 3.5f;
     public String prefabName = "Projectile";
@@ -119,6 +119,27 @@ public class EnemyControllerAI : MonoBehaviour
 
         projectiles = gameObject.AddComponent<ShootProjectiles>();
         // projectiles.setProjectileCount(projectileCount, "Projectile", projectileSpeed);
+
+        switch (sType) 
+        {
+            case ShootProjectiles.shootingType.single:
+                projectileSpeed = 6f;
+                break;
+            case ShootProjectiles.shootingType.narrowSpread:
+                projectileSpeed = 4f;
+                break;
+            case ShootProjectiles.shootingType.widespread:
+                projectileSpeed = 4.5f;
+                break;
+            case ShootProjectiles.shootingType.semicircleSpread:
+                projectileSpeed = 3.5f;
+                break;
+            default:
+                projectileSpeed = 5f;
+                break;
+        }
+
+
         projectiles.setProjectileEnums(sFreq, sType, projectileType, sDensity);
         projectiles.setProjectileBehavior(enemyFireRate, projectileCount, projectileSpeed, prefabName);
 
@@ -686,7 +707,7 @@ public class EnemyControllerAI : MonoBehaviour
         }
 
         clearOldPositions();
-        projectiles.FireProjectiles((Vector2)transform.position + new Vector2 (enemyWidth/2f * lookDirection.x, 0), lookDirection, (Vector2)playerPosition);
+        projectiles.FireProjectiles((Vector2)transform.position, lookDirection, (Vector2)playerPosition);
     }
 
     // nuff sed
