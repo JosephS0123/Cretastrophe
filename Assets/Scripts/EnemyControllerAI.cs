@@ -143,19 +143,19 @@ public class EnemyControllerAI : MonoBehaviour
         switch (sType) 
         {
             case ShootProjectiles.shootingType.single:
-                projectileSpeed = 6f;
+                projectileSpeed *= 2f;
                 break;
             case ShootProjectiles.shootingType.narrowSpread:
-                projectileSpeed = 4f;
+                projectileSpeed *= 1.4f;
                 break;
             case ShootProjectiles.shootingType.widespread:
-                projectileSpeed = 4.5f;
+                projectileSpeed *= 1.3f;
                 break;
             case ShootProjectiles.shootingType.semicircleSpread:
-                projectileSpeed = 3.5f;
+                projectileSpeed *= 1.2f;
                 break;
             default:
-                projectileSpeed = 5f;
+                projectileSpeed *= 1.5f;
                 break;
         }
 

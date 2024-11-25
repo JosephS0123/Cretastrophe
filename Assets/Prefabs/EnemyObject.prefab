@@ -213,9 +213,9 @@ MonoBehaviour:
   sFreq: 0
   sType: 3
   projectileCount: 5
-  projectileSpeed: 6
+  projectileSpeed: 4
   playerDetectRadius: 4.5
-  enemyFireRate: 5
+  enemyFireRate: 3.5
   prefabName: Projectile
   viewCone: 45
   lookDirectionAngle: 25

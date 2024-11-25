@@ -13,6 +13,7 @@ public class ShootProjectiles : MonoBehaviour
     private shootingFrequency sFreq;
     private shootingType sType;
     private shootingDensity sDensity;
+    public float minSingleShotfireRate = 12f;
 
     private Projectile.projectileType projectileType; // default is spike
     private Projectile.projectileAttribute projectileAttribute; /* TODO: */
@@ -84,7 +85,7 @@ public class ShootProjectiles : MonoBehaviour
             projScript.direction = directions[0];
             projScript.projectileA = projectileAttribute;
             projScript.projectileT = projectileType;
-            projScript.speed = projectileSpeed * 2;
+            projScript.speed = (projectileSpeed < minSingleShotfireRate) ? minSingleShotfireRate : projectileSpeed;
         
         } else if (!randomSpread) {
             assignLaunchAngles();
