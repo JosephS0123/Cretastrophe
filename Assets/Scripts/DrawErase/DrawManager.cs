@@ -277,7 +277,20 @@ public class DrawManager : MonoBehaviour
         {
             if (collider2D)
             {
-                if (collider2D.tag == "Player")
+                String _tag = collider2D.tag;
+                if (_tag == "Player")
+                {
+                    return false;
+                }
+                if(!isDynamic && _tag == "BlueLine")
+                {
+                    return false;
+                }
+                if(isDynamic && _tag == "White" || _tag == "Red")
+                {
+                    return false;
+                }
+                if(isDynamic &&  _tag == "BlueLine" && collider2D.transform.parent.GetComponent<Rigidbody2D>().bodyType == RigidbodyType2D.Dynamic)
                 {
                     return false;
                 }
