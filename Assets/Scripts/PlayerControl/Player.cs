@@ -14,7 +14,7 @@ public class Player : MonoBehaviour
     float accelerationTimeGrounded = .05f;
     float accelerationTimeIcy = .3f;
     float moveSpeed = 6;
-    float moveSpeedIce = 8;
+    float moveSpeedIce = 10;
 
     float baseVelocity = 6;
     float holdAcceleration = 25;

@@ -28,7 +28,7 @@ public class SpikeBallSpawner : MonoBehaviour
 
     private IEnumerator respawnBallIEnum()
     {
-        yield return new WaitForSeconds(3);
+        yield return new WaitForSeconds(2);
         spikeBallInstance = Instantiate(spikeBall, transform.position, Quaternion.identity, this.transform);
         spikeBallInstance.spikeBallSpawner = this;
     }

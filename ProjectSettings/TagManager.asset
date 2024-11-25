@@ -11,6 +11,7 @@ TagManager:
   - BallDespawn
   - PhysicsObj
   - BlueLine
+  - Ground
   layers:
   - Default
   - TransparentFX

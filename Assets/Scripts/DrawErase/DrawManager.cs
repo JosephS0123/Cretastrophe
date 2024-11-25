@@ -31,19 +31,23 @@ public class DrawManager : MonoBehaviour
     private Line _currentLine;
     private Line _prevLine;
     private bool isDynamic = false;
+
+    public bool canDrawWhite;
+    public bool canDrawRed;
+    public bool canDrawBlue;
     void Start()
     {
         _cam = Camera.main;
         prevMousePos = _cam.ScreenToWorldPoint(Input.mousePosition);
-        _linePrefab = _whiteLinePrefab;
+        //_linePrefab = _whiteLinePrefab;
         _chalkManager = _whiteChalkManager;
     }
 
-    
+
     void Update()
     {
         Vector2 mousePos = _cam.ScreenToWorldPoint(Input.mousePosition);
-        bool canDraw = drawZoneCheck(mousePos);
+        bool canDraw = drawZoneCheck(mousePos) && _linePrefab != null && (canDrawWhite || canDrawRed || canDrawBlue);
 
         if(Input.GetMouseButtonDown(0) && canDraw)
         {
@@ -94,7 +98,7 @@ public class DrawManager : MonoBehaviour
             Destroy(eraserInstance);
         }
 
-        if(Input.GetKeyDown("1"))
+        if(Input.GetKeyDown("1") && canDrawWhite)
         {
             _linePrefab = _whiteLinePrefab;
             _chalkManager = _whiteChalkManager;
@@ -111,7 +115,7 @@ public class DrawManager : MonoBehaviour
             }
             isDynamic = false;
         }
-        else if(Input.GetKeyDown("2"))
+        else if(Input.GetKeyDown("2") && canDrawRed)
         {
             _linePrefab = _redLinePrefab;
             _chalkManager = _redChalkManager;
@@ -128,7 +132,7 @@ public class DrawManager : MonoBehaviour
             }
             isDynamic = false;
         }
-        else if (Input.GetKeyDown("3"))
+        else if (Input.GetKeyDown("3") && canDrawBlue)
         {
             _linePrefab = _blueLinePrefab;
             _chalkManager = _blueChalkManager;
@@ -257,7 +261,7 @@ public class DrawManager : MonoBehaviour
         {
             if (hit2D)
             {
-                if (hit2D.collider.tag == "NoDraw" || hit2D.collider.tag == "Eraser")
+                if (hit2D.collider.tag == "NoDraw" || hit2D.collider.tag == "Eraser" || hit2D.collider.tag == "Ground")
                 {
                     return false;
                 }

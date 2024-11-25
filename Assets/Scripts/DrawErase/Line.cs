@@ -12,6 +12,7 @@ public class Line : MonoBehaviour
     [SerializeField] private PolygonCollider2D _collider;
     public ChalkManager _chalkManager = null;
     public GameObject dynamicLineParent;
+    private bool isErased = false;
 
     private readonly List<Vector2> _points = new List<Vector2>();
     void Start()
@@ -116,11 +117,13 @@ public class Line : MonoBehaviour
     private void OnTriggerEnter2D(Collider2D collision)
     {
         // Destroy the item after its collision triggered
-        if (collision.gameObject.tag == "Eraser")
+        if (collision.gameObject.tag == "Eraser" && !isErased)
         {
             if(gameObject.tag == "BlueLine")
             {
                 Transform _parent = gameObject.transform.parent;
+                Vector3 _velocity = _parent.GetComponent<Rigidbody2D>().velocity;
+                int newChildren = 0, oldChildren = 0;
                 if(_parent.gameObject.GetComponent<Rigidbody2D>().bodyType == RigidbodyType2D.Kinematic)
                 {
                     
@@ -144,31 +147,40 @@ public class Line : MonoBehaviour
                         if (afterCurrent)
                         {
                             child.parent = _newParent.transform;
+                            newChildren++;
                         }
-                        if (child.transform == gameObject.transform)
+                        else
                         {
-                            afterCurrent = true;
+                            if (child.transform == gameObject.transform)
+                            {
+                                afterCurrent = true;
+                            }
+                            oldChildren++;
                         }
                     }
-                    if (_newParent.transform.childCount == 0)
+
+                    if (newChildren == 0)
                     {
                         Destroy(_newParent.gameObject);
                     }
                     else
                     {
                         _newParent.gameObject.GetComponent<Rigidbody2D>().bodyType = RigidbodyType2D.Dynamic;
+                        _newParent.gameObject.GetComponent<Rigidbody2D>().velocity = _velocity;
                     }
-                    if (_parent.childCount == 1)
-                    {
-                        Destroy(_parent.gameObject);
-                    }
+
                 }
 
+                _parent = gameObject.transform.parent;
+                if (oldChildren == 1)
+                {
+                    Destroy(_parent.gameObject);
+                }
             }
             _chalkManager.ReplenishChalk(.1f);
+            gameObject.transform.parent = null;
             Destroy(gameObject);
-
-            
+            isErased = true;
         }
     }
 

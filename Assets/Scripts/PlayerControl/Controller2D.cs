@@ -8,16 +8,19 @@ public class Controller2D : RayCastController
     
     public CollisionInfo collisions;
     public Vector2 playerInput;
+    float iceTimer = 100f;
 
     public override void Start()
     {
         base.Start();
+        collisions.onIce = false;
     }
     
     public void Move(Vector2 velocity, Vector2 input, bool standingOnPlatform = false)
     {
         UpdateRaycastOrigins();
         collisions.Reset();
+        iceTimer += Time.deltaTime;
         collisions.velocityOld = velocity;
         playerInput = input;
 
@@ -122,6 +125,11 @@ public class Controller2D : RayCastController
                 if(collisions.below && hit.collider.tag == "BlueLine")
                 {
                     collisions.onIce = true;
+                    iceTimer = 0;
+                }
+                else
+                {
+                    if (iceTimer > 0.2f) { collisions.onIce = false; }
                 }
             }
         }
@@ -267,7 +275,7 @@ public class Controller2D : RayCastController
 
             slopeAngleOld = slopeAngle;
             slopeAngle = 0;
-            onIce = false;
+            //onIce = false;
         }
     }
     
