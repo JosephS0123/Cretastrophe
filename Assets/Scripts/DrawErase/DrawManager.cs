@@ -296,4 +296,22 @@ public class DrawManager : MonoBehaviour
         screenClearInstance = Instantiate(screenClear, Vector3.zero, Quaternion.identity);
     }
 
+    public void changeColor(String color)
+    {
+        if (color == "white")
+        {
+            _linePrefab = _whiteLinePrefab;
+            _chalkManager = _whiteChalkManager;
+        }
+        else if (color == "red")
+        {
+            _linePrefab = _redLinePrefab;
+            _chalkManager = _redChalkManager;
+        }
+        else if (color == "blue")
+        {
+            _linePrefab = _blueLinePrefab;
+            _chalkManager = _blueChalkManager;
+        }
+    }
 }

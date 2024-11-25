@@ -6,6 +6,7 @@ public class SpikeBallSpawner : MonoBehaviour
 {
     public PhysicsSpikeBall spikeBall;
     private PhysicsSpikeBall spikeBallInstance;
+    public float waitTime;
     void Start()
     {
         Vector3 spawnPos = transform.position;
@@ -28,7 +29,7 @@ public class SpikeBallSpawner : MonoBehaviour
 
     private IEnumerator respawnBallIEnum()
     {
-        yield return new WaitForSeconds(2);
+        yield return new WaitForSeconds(waitTime);
         spikeBallInstance = Instantiate(spikeBall, transform.position, Quaternion.identity, this.transform);
         spikeBallInstance.spikeBallSpawner = this;
     }

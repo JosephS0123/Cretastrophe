@@ -262,6 +262,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   spikeBall: {fileID: 7248912312234422823, guid: 172f40ce50e9c4340a5fe8d4ecf12126, type: 3}
+  waitTime: 1.5
 --- !u!1 &6290658510945528494
 GameObject:
   m_ObjectHideFlags: 0

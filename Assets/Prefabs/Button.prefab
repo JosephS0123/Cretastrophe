@@ -72,11 +72,11 @@ SpriteRenderer:
   m_AutoUVMaxDistance: 0.5
   m_AutoUVMaxAngle: 89
   m_LightmapParameters: {fileID: 0}
-  m_SortingLayerID: 0
-  m_SortingLayer: 0
+  m_SortingLayerID: 1024043353
+  m_SortingLayer: 5
   m_SortingOrder: 0
-  m_Sprite: {fileID: 21300000, guid: 20246e23b9f7e55479975475ae25a908, type: 3}
-  m_Color: {r: 0.8867924, g: 0.2300641, b: 0.2300641, a: 1}
+  m_Sprite: {fileID: 21300000, guid: 94c804ecdcdeb0e4f9389907c4b6613e, type: 3}
+  m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
   m_FlipY: 0
   m_DrawMode: 0
@@ -134,3 +134,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   door: {fileID: 0}
+  drawSound: {fileID: 8300000, guid: 25399b5fadb31814884ed1cabf48be97, type: 3}
+  pressedSprite: {fileID: 21300000, guid: 212d0beeaa2dff64099b073059e1fec8, type: 3}
+  unpressedSprite: {fileID: 21300000, guid: 94c804ecdcdeb0e4f9389907c4b6613e, type: 3}
+  doorIndex: 0
