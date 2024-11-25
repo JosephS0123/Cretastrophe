@@ -329,10 +329,6 @@ public class EnemyControllerAI : MonoBehaviour
                     }
                 }
             }
-            /* Breaks enemy movement, unsure if possible to currently implement */
-            // if (rollDice(1f) && CanJump()) {
-            //     movetype = MoveType.startJump;
-            // }
         } else {
             stuckCounter = 0;
         }
@@ -354,17 +350,19 @@ public class EnemyControllerAI : MonoBehaviour
                 break;
             case MoveType.midJump:
                 // Have we reached the stop point? Either the middle of the jump.x or the supposed end.x
-                if (lookDirection.x > 0 ? (stopJumpAtX <= transform.position.x) : (stopJumpAtX >= transform.position.x)) {
-                    movetype = MoveType.freefall;
-                } else {
-                    MoveForward();
-                }
+                // if (lookDirection.x > 0 ? (transform.position.x >= stopJumpAtX) : (transform.position.x <= stopJumpAtX)) {
+                //     movetype = MoveType.freefall;
+                // } else {
+                //     MoveForward();
+                // }
+                MoveForward();
                 break;
             case MoveType.fallOff: // move forward til not grounded
                 MoveForward();
                 break;
             case MoveType.freefall:
                 DoFall();
+                clearOldPositions();
                 break;
             default:
                 /* shouldnt happen*/
@@ -387,9 +385,12 @@ public class EnemyControllerAI : MonoBehaviour
 
         /* sudden contact with ground mid jump cancels forward motion*/
         if (!onGround) {
-            if (movetype != MoveType.midJump) {
+            if (movetype == MoveType.midJump || movetype == MoveType.startJump) {
+                return;
                 /* this can cause issues if the enemy moves to fast and it lifts off ground*/
+            } else {
                 movetype = MoveType.freefall;
+                return;
             }
         } else {
             if (IsWallAhead())
@@ -428,8 +429,6 @@ public class EnemyControllerAI : MonoBehaviour
                 movetype = MoveType.straight;
             }
         }
-        
-        
     }
 
     /* Check for obstacle immediately ahead of entity */

@@ -135,7 +135,7 @@ Rigidbody2D:
   m_LinearDrag: 0
   m_AngularDrag: 0.05
   m_GravityScale: 1
-  m_Material: {fileID: 0}
+  m_Material: {fileID: 6200000, guid: fd9f440412c935a5e8a805258c8aed6d, type: 2}
   m_IncludeLayers:
     serializedVersion: 2
     m_Bits: 768
@@ -208,6 +208,7 @@ MonoBehaviour:
   searchType: 0
   enemyViewType: 0
   projectileType: 0
+  pAttribute: 1
   sDensity: 0
   sFreq: 0
   sType: 3
