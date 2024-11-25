@@ -10,6 +10,8 @@ GameObject:
   m_Component:
   - component: {fileID: 5472147210281732534}
   - component: {fileID: 2089580766495034757}
+  - component: {fileID: 5195340210072259617}
+  - component: {fileID: 3337193154849132638}
   m_Layer: 0
   m_Name: FInish
   m_TagString: Untagged
@@ -63,7 +65,7 @@ BoxCollider2D:
   m_CallbackLayers:
     serializedVersion: 2
     m_Bits: 4294967295
-  m_IsTrigger: 0
+  m_IsTrigger: 1
   m_UsedByEffector: 0
   m_UsedByComposite: 0
   m_Offset: {x: -0.0013027191, y: -0.18788576}
@@ -79,6 +81,37 @@ BoxCollider2D:
   serializedVersion: 2
   m_Size: {x: 0.642498, y: 1.3757715}
   m_EdgeRadius: 0
+--- !u!114 &5195340210072259617
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1496742245129466643}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e5bcfc47a20173a4e933672d3c829157, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+--- !u!114 &3337193154849132638
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1496742245129466643}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 791120004fe1be9448b2d3bd12d9c12d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  drawSound: {fileID: 8300000, guid: 9dba8db1cee78fc458975eb605cedac6, type: 3}
+  completeLevel: {fileID: 0}
+  chalkUI: {fileID: 0}
+  barUI: {fileID: 0}
+  FirebarUI: {fileID: 0}
+  IcebarUI: {fileID: 0}
+  levelCompleteUI: {fileID: 0}
 --- !u!1 &1667255809668021176
 GameObject:
   m_ObjectHideFlags: 0
