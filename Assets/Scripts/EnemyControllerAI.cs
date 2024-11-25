@@ -52,6 +52,8 @@ public class EnemyControllerAI : MonoBehaviour
     /* Positioning Related Info */
     public LayerMask groundLayer; /* Obstacle layer | May need considerations for other interactions*/
     public LayerMask playerLayer;
+    public LayerMask chalkLayer;
+
     GameObject player;
     Vector3 playerPosition;
     BoxCollider2D playerBoxCollider;
@@ -112,12 +114,13 @@ public class EnemyControllerAI : MonoBehaviour
         clearOldPositions();
         player = GameObject.Find("Player");
         playerLayer = LayerMask.GetMask("Player");
+        chalkLayer = LayerMask.GetMask("Chalk");
         playerBoxCollider = player.GetComponent<BoxCollider2D>();
         playerWidth = playerBoxCollider.size.x;
         playerHeight = playerBoxCollider.size.y;
 
         aggroFrameTimeRemaining = aggroFrameTime;
-        actualLookDirectionAngle = lookDirectionAngle;
+        actualLookDirectionAngle = (lookDirection.x > 0) ? lookDirectionAngle : 180f - lookDirectionAngle;
 
         projectiles = gameObject.AddComponent<ShootProjectiles>();
         // projectiles.setProjectileCount(projectileCount, "Projectile", projectileSpeed);
@@ -922,13 +925,13 @@ public class EnemyControllerAI : MonoBehaviour
 
         // Calculate the direction from the current object to the target point
         Vector2 direction = (targetPoint - transform.position).normalized;
-        RaycastHit2D hit = Physics2D.Raycast(enemyPos, direction, playerDetectRadius, groundLayer | playerLayer);
+        RaycastHit2D hit = Physics2D.Raycast(enemyPos, direction, playerDetectRadius, groundLayer | playerLayer | chalkLayer);
 
         // Check if the ray hit something
         if (hit.collider != null)
         {
             // Check if the object hit is on the Obstacle layer
-            if (((1 << hit.collider.gameObject.layer) & groundLayer) != 0)
+            if ((((1 << hit.collider.gameObject.layer) & groundLayer ) != 0 ) || (((1 << hit.collider.gameObject.layer) & chalkLayer ) != 0))
             {
                 // Debug.Log("Hit an obstacle: " + hit.collider.gameObject.name);
                 // Debug.DrawLine(enemyPos, hit.point, Color.red, 1f); 

@@ -226,6 +226,9 @@ MonoBehaviour:
   playerLayer:
     serializedVersion: 2
     m_Bits: 256
+  chalkLayer:
+    serializedVersion: 2
+    m_Bits: 128
   moveSpeed: 2.5
   jumpForce: 7
   hopForce: 1

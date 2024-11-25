@@ -267,7 +267,8 @@ public class Projectile : MonoBehaviour
     {
         // Check if the other collider is on the "Obstacle" or "Player" layers
         if (other.gameObject.layer == LayerMask.NameToLayer("Obstacle") ||
-            other.gameObject.layer == LayerMask.NameToLayer("Player"))
+            other.gameObject.layer == LayerMask.NameToLayer("Player") ||
+            other.gameObject.layer == LayerMask.NameToLayer("Chalk"))
         {
             if (other.gameObject.layer == LayerMask.NameToLayer("Player"))
             {

@@ -57,7 +57,7 @@ CircleCollider2D:
     m_Bits: 4294967295
   m_ForceReceiveLayers:
     serializedVersion: 2
-    m_Bits: 4294967295
+    m_Bits: 0
   m_ContactCaptureLayers:
     serializedVersion: 2
     m_Bits: 4294967295
@@ -86,8 +86,11 @@ MonoBehaviour:
   direction: 0
   projectileT: 2
   projectileA: 0
-  lifeTime: 15
+  pMobility: 1
+  projectileLifetime: 15
+  pullRadius: 3.5
   pullAccelerationTime: 3
+  canShrinkPlayer: 0
 --- !u!50 &3580858712291274920
 Rigidbody2D:
   serializedVersion: 4
