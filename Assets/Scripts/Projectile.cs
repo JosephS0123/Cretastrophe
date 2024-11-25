@@ -1,4 +1,5 @@
 using UnityEngine;
+using UnityEngine.SceneManagement; 
 
 public class Projectile : MonoBehaviour
 {
@@ -17,21 +18,28 @@ public class Projectile : MonoBehaviour
     public enum projectileAttribute {sticky, nonsticky, tracking, fire, ice};
     public projectileType projectileT; // projectileType.spike  is default
     public projectileAttribute projectileA = projectileAttribute.nonsticky;
-    private float distanceTilDespawn = 10f;
+    private float distanceTilDespawn = 20f;
     private Vector2 startPos;
 
     /* player tracking stuff */
     GameObject player;
-    Vector2 playerPosition;
+    private Player playerScript;
 
-    private float timer;
+    private float timer = 0;
     /* blackhole */
-    public float lifeTime = 15f; // time in seconds before blackhole despawns
-    public float effectiveDistance; // distance that player must be within to be affected by gravity
+    public float projectileLifetime = 15f; // time in seconds before blackhole despawns
+    private float pullRadius = 3.5f; // distance that player must be within to be affected by gravity
+    private float maxPullStrength = 3f;
+    private Controller2D playerController;
+    public float pullAccelerationTime = 10f;
+    private float pullTimer = 0f;
+    private bool killingPlayer = false;
+    private float timeTilDeath = 60f;
 
     /* for boomerang behavior */
     private float timeTilReturn;
     private bool isReturning;
+    private bool runTimer = false;
 
     void Start()
     {
@@ -44,21 +52,16 @@ public class Projectile : MonoBehaviour
         transform.rotation = Quaternion.Euler(new Vector3(0, 0, direction));
         startPos = (Vector2)transform.position;
 
-        if (projectileA == projectileAttribute.sticky || projectileA == projectileAttribute.tracking) {
-            timer = 0;
-            lifeTime = 15f; // time in seconds before projectile despawns
-        }
+        setProjectileLifetime();
 
         switch (projectileT)
         {
             case projectileType.boomerang:
-                timer = 0;
                 isReturning = false;
                 break;
             case projectileType.blackhole:
-                timer = 0;
-                lifeTime = 15f; 
-                effectiveDistance = 5f;
+                projectileLifetime = 15f; 
+                pullRadius = 5f;
 
                 player = GameObject.Find("Player");
                 if (player == null) {
@@ -68,7 +71,8 @@ public class Projectile : MonoBehaviour
                     Debug.Log("PLAYER NOT FOUND IN PROJECTILE.CS \nDestroying projectile object!");
                     Debug.Log("PLAYER NOT FOUND IN PROJECTILE.CS \nDestroying projectile object!");
                 } else {
-                    playerPosition = player.transform.position;
+                    playerController = player.GetComponent<Controller2D>();
+                    playerScript = player.GetComponent<Player>();
                 }
                 break;
             default:
@@ -76,7 +80,7 @@ public class Projectile : MonoBehaviour
         }
     }
 
-    void Update()
+    void FixedUpdate()
     {
         // bullet goes out of bounds 
         if (Vector2.Distance((Vector2)transform.position, startPos) >= distanceTilDespawn)
@@ -84,7 +88,12 @@ public class Projectile : MonoBehaviour
             Destroy(gameObject);
         }
 
-        timer = timer += Time.deltaTime;
+        if (runTimer) {
+            timer += Time.deltaTime;
+            if (timer >= projectileLifetime) {
+                Destroy(gameObject);
+            }
+        }
 
         switch (projectileT)
         {
@@ -101,11 +110,20 @@ public class Projectile : MonoBehaviour
                 }
                 break;
             case projectileType.blackhole:
-                playerPosition = player.transform.position;
+                if (!runTimer) {
+                    doRunTimer();
+                }
 
-                /* call vortex() method to suck in player, updating their movement if nearby */
+                // give like a bit over a second in the black hole before killing player
+                if (killingPlayer) {
+                    if (timeTilDeath <= 0) {
+                        killPlayer();
+                    }
+                }
 
-                if (timer >= lifeTime) {
+                doBlackHole();
+
+                if (timer >= projectileLifetime) {
                     Destroy(gameObject);
                 }
                 break;
@@ -115,34 +133,93 @@ public class Projectile : MonoBehaviour
 
     }
 
-    /* remove this ?*/
-    void OnCollisionEnter2D(Collision2D collision)
+    void doBlackHole()
     {
-        // Check if the collision object is on the "Obstacle" or "Player" layers
-        if (collision.gameObject.layer == LayerMask.NameToLayer("Obstacle") ||
-            collision.gameObject.layer == LayerMask.NameToLayer("Player"))
+        Vector2 playerPosition = player.transform.position;
+        Vector2 blackHolePosition = transform.position;
+        float distance = Vector2.Distance(playerPosition, blackHolePosition);
+
+        // If the player is within range, start pulling
+        if (distance <= pullRadius)
         {
-            // Destroy the projectile when it collides with something in "Obstacle" or "Player" layer
-            if (collision.gameObject.layer == LayerMask.NameToLayer("Player")) {
-                Debug.Log("Destroying projectile due to collision with player");
-                if (projectileT == projectileType.blackhole) {
-                    /* TODO: KILL PLAYER */
-                } else {
-                    Destroy(gameObject);
-                }
-            } else { /* Hit an obstacle */
-                if (projectileT == projectileType.boomerang) {
-                    if (isReturning) {
-                        /* boomerang becomes destructible if its returning otherwise indestructable */
-                        Destroy(gameObject);
-                    }
-                    /* return */
-                } else {
-                    Destroy(gameObject);
-                }
-            }
+            if (distance <= .5f) {timeTilDeath--;}
+            Vector2 directionToBlackHole = (blackHolePosition - playerPosition).normalized;
+
+            float pullStrength = Mathf.Clamp01(1 - (distance / pullRadius)) * maxPullStrength;
+
+            // Gradually increase pull strength over time (simulate acceleration with timer)
+            pullTimer += Time.deltaTime;
+            float currentPullStrength = Mathf.Min(pullStrength * (pullTimer / pullAccelerationTime), pullStrength);
+
+            ApplyGravitationalPull(directionToBlackHole, currentPullStrength);
+        }
+        else
+        {
+            // If the player is out of range, reset the pull timer
+            pullTimer = 0f;
         }
     }
+
+    void ApplyGravitationalPull(Vector2 direction, float strength)
+    {
+        Vector2 currentVelocity = playerScript.getPlayerVelocity();
+
+        // Calculate the change in velocity due to the gravitational pull
+        Vector2 pullVelocity = direction * strength;
+
+        // combine velocities to simulate resistance
+        playerScript.updatePlayerVelocity(currentVelocity + pullVelocity);
+
+        // Update the player's movement
+        playerController.Move(playerScript.getPlayerVelocity() * Time.deltaTime, Vector2.zero); 
+    }
+
+    
+    void killPlayer()
+    {
+        Scene currentScene = SceneManager.GetActiveScene();
+        SceneManager.LoadScene(currentScene.name);
+    }
+    
+    /* remove this ?*/
+    // void OnCollisionEnter2D(Collision2D collision)
+    // {
+    //     // Check if the collision object is on the "Obstacle" or "Player" layers
+    //     if (collision.gameObject.layer == LayerMask.NameToLayer("Obstacle") ||
+    //         collision.gameObject.layer == LayerMask.NameToLayer("Player"))
+    //     {
+    //         // Destroy the projectile when it collides with something in "Obstacle" or "Player" layer
+    //         if (collision.gameObject.layer == LayerMask.NameToLayer("Player")) {
+    //             Debug.Log("Destroying projectile due to collision with player");
+    //             if (projectileT == projectileType.blackhole) {
+    //                 killingPlayer = true;
+    //                 /* TODO: KILL PLAYER */
+    //                 // if (!killingPlayer) {
+    //                 //     killPlayer();
+    //                 //     Destroy(gameObject);
+
+    //                 // }
+    //             } else {
+    //                 Destroy(gameObject);
+    //             }
+    //         } else { /* Hit an obstacle */
+    //             if (projectileT == projectileType.boomerang) {
+    //                 if (isReturning) {
+    //                     /* boomerang becomes destructible if its returning otherwise indestructable */
+    //                     Destroy(gameObject);
+    //                 }
+    //                 /* return */
+    //             } else if (projectileT == projectileType.blackhole) {
+    //                 rb.velocity = Vector2.zero;
+    //             } else {
+    //                 Destroy(gameObject);
+    //             }
+    //         }
+    //     }
+    // }
+
+
+
 
     void OnTriggerEnter2D(Collider2D other)
     {
@@ -152,14 +229,78 @@ public class Projectile : MonoBehaviour
         {
             if (other.gameObject.layer == LayerMask.NameToLayer("Player"))
             {
-                /*TODO: Kill player*/
-                Destroy(gameObject);
+                if (projectileT == projectileType.blackhole) {
+                    /* TODO: KILL PLAYER */
+                    killingPlayer = true;
+                    // if (!killingPlayer) {
+                    //     killPlayer();
+                    //     Destroy(gameObject);
+                    // }
+                } else {
+                    killPlayer();
+                    Destroy(gameObject);
+                }
             }
-            else if (other.gameObject.layer == LayerMask.NameToLayer("Obstacle"))
+            else
             {
-                Destroy(gameObject);
-                // Debug.Log("Hit an obstacle!");
+                if (projectileA == projectileAttribute.sticky) {
+                    if (!runTimer) {
+                        doRunTimer();
+                    }
+
+                    if (timer >= projectileLifetime) {
+                        Destroy(gameObject);
+                    }
+                    rb.velocity = Vector3.zero;
+                    rb.gravityScale = 0;
+                    return;
+                }
+
+                if (projectileT == projectileType.boomerang) {
+                    if (isReturning) {
+                        /* boomerang becomes destructible if its returning otherwise indestructable */
+                        Destroy(gameObject);
+                    }
+                    /* return */
+                } else if (projectileT == projectileType.blackhole) {
+                    rb.velocity = Vector2.zero;
+                } else {
+                    Destroy(gameObject);
+                }
             }
+        }
+    }
+
+
+    private void doRunTimer()
+    {
+        runTimer = true;
+        timer = 0;
+    }
+
+    private void setProjectileLifetime()
+    {
+        switch (projectileT)
+        {
+            case projectileType.blackhole:
+                doRunTimer();
+                projectileLifetime = 15f;
+                break;
+            case projectileType.boomerang:
+                doRunTimer();
+                projectileLifetime = 8f;
+                break;
+            default:
+                break;
+        }
+
+        switch (projectileA) 
+        {
+            case projectileAttribute.sticky:
+                projectileLifetime = 4f;
+                break;
+            default:
+                break;
         }
     }
 

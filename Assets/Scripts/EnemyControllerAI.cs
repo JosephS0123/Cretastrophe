@@ -31,6 +31,7 @@ public class EnemyControllerAI : MonoBehaviour
     public PlayerSearchType searchType;
     public ViewType enemyViewType = ViewType.constant;
     public Projectile.projectileType projectileType = Projectile.projectileType.spike; /*TODO: assign to init func*/
+    public Projectile.projectileAttribute pAttribute = Projectile.projectileAttribute.nonsticky;
     private ShootProjectiles projectiles;
     public ShootProjectiles.shootingDensity sDensity= ShootProjectiles.shootingDensity.constant;
     public ShootProjectiles.shootingFrequency sFreq = ShootProjectiles.shootingFrequency.constant;
@@ -40,7 +41,7 @@ public class EnemyControllerAI : MonoBehaviour
     public float projectileSpeed = 1f;
     public float playerDetectRadius = 3.5f;
     public float enemyFireRate = 3.5f;
-    public String prefabName = "Projectile";
+    public String prefabName;
     public float viewCone = 45f; // Enemies FOV +- viewcone/2
     public float lookDirectionAngle = 25f; // the point where the enemy is looking 
     private float actualLookDirectionAngle;
@@ -120,6 +121,24 @@ public class EnemyControllerAI : MonoBehaviour
         projectiles = gameObject.AddComponent<ShootProjectiles>();
         // projectiles.setProjectileCount(projectileCount, "Projectile", projectileSpeed);
 
+        switch (projectileType)
+        {
+            case Projectile.projectileType.blackhole:
+                prefabName = "blackholeProjectile";
+                break;
+            case Projectile.projectileType.spike:
+                prefabName = "spikeProjectile";
+                break;
+            case Projectile.projectileType.boomerang:
+                prefabName = "boomerangProjectile";
+                break;
+            case Projectile.projectileType.bullet:
+                prefabName = "bulletProjectile";
+                break;
+            default:
+                break;
+        }
+
         switch (sType) 
         {
             case ShootProjectiles.shootingType.single:
@@ -140,7 +159,7 @@ public class EnemyControllerAI : MonoBehaviour
         }
 
 
-        projectiles.setProjectileEnums(sFreq, sType, projectileType, sDensity);
+        projectiles.setProjectileEnums(sFreq, sType, projectileType, sDensity, pAttribute);
         projectiles.setProjectileBehavior(enemyFireRate, projectileCount, projectileSpeed, prefabName);
 
         switch (searchType) {

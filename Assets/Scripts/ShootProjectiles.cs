@@ -82,6 +82,8 @@ public class ShootProjectiles : MonoBehaviour
             GameObject projectile = Instantiate(projectilePrefab, spawnPosition, Quaternion.identity);
             Projectile projScript = projectile.GetComponent<Projectile>();
             projScript.direction = directions[0];
+            projScript.projectileA = projectileAttribute;
+            projScript.projectileT = projectileType;
             projScript.speed = projectileSpeed * 2;
         
         } else if (!randomSpread) {
@@ -93,6 +95,9 @@ public class ShootProjectiles : MonoBehaviour
                 Vector2 spawnPosition = enemyPosition;  
                 GameObject projectile = Instantiate(projectilePrefab, spawnPosition, Quaternion.identity);
                 Projectile projScript = projectile.GetComponent<Projectile>();
+                projScript.projectileA = projectileAttribute;
+                projScript.speed = projectileSpeed;
+                projScript.projectileT = projectileType;
 
                 /* Ensure symmetry and correct launch angles of projectiles */
                 if (enemyLookDir.x > 0) {
@@ -100,7 +105,6 @@ public class ShootProjectiles : MonoBehaviour
                 } else {
                     projScript.direction = 180f - directions[i];
                 }
-                projScript.speed = projectileSpeed * 2;
             }
         } else {
             /* maybe implement random spread here */
@@ -140,7 +144,6 @@ public class ShootProjectiles : MonoBehaviour
                 tryUpdateFirerate();
             }
 
-
             if (projectilePrefab == null) 
             {
                 Debug.LogError("Projectile prefab is missing! Please attach it to ShootProjectiles Script!");
@@ -149,68 +152,17 @@ public class ShootProjectiles : MonoBehaviour
 
             fireVolley(enemyPosition, enemyLookDir, playerPos);
 
-            // switch (sType) 
-            // {
-            //     case shootingType.single:
-            //         fireVolley(enemyPosition, enemyLookDir, playerPos);
-            //         break;
-            //     case shootingType.narrowSpread:
-            //         fireVolley(enemyPosition, enemyLookDir, playerPos);
-            //         break;
-            //     case shootingType.widespread:
-            //         fireVolley(enemyPosition, enemyLookDir, playerPos);
-            //         break;
-            //     case shootingType.semicircleSpread:
-            //         fireVolley(enemyPosition, enemyLookDir, playerPos);
-            //         break;
-
-            //     default:
-            //         break;
-            // }
-
-
-        // /*TODO: DELETE BELOW HERE // REFERENCE CODE*/
-        //     // Fire directly at player position
-        //     if (projectileCt == 1) {
-        //         Vector2 direction = playerPos - (Vector2)transform.position;
-        //         float angleInRadians = Mathf.Atan2(direction.y, direction.x);
-        //         directions[0] = angleInRadians * Mathf.Rad2Deg;
-
-        //         Vector2 spawnPosition = enemyPosition + new Vector2 (.1f * enemyLookDir.x, 0);  
-        //         GameObject projectile = Instantiate(projectilePrefab, spawnPosition, Quaternion.identity);
-        //         Projectile projScript = projectile.GetComponent<Projectile>();
-        //         projScript.direction = directions[0];
-        //         projScript.speed = projectileSpeed * 2;
-        //     } else {
-        //         // Instantiate and fire projectiles
-        //         for (int i = 0; i < projectileCt; i++)
-        //         {
-        //             Vector2 spawnPosition = enemyPosition + new Vector2 (.1f * enemyLookDir.x, 0);  
-        //             GameObject projectile = Instantiate(projectilePrefab, spawnPosition, Quaternion.identity);
-        //             Projectile projScript = projectile.GetComponent<Projectile>();
-
-        //             /* Ensure symmetry and correct launch angles of projectiles */
-        //             if (enemyLookDir.x > 0) {
-        //                 projScript.direction = directions[i];
-        //             } else {
-        //                 projScript.direction = 180f - directions[i];
-        //             }
-        //             projScript.speed = projectileSpeed * 2;
-        //         }
-        //         projectileCt--;
-        //     }
         }
     }
 
     // initialize before behavior (1)
-    public void setProjectileEnums(shootingFrequency shootFreq, shootingType shootType, Projectile.projectileType projectileType, shootingDensity sDensity = shootingDensity.constant)
+    public void setProjectileEnums(shootingFrequency shootFreq, shootingType shootType, Projectile.projectileType projectileType, shootingDensity sDensity = shootingDensity.constant, Projectile.projectileAttribute pAttribute=Projectile.projectileAttribute.nonsticky)
     {
         sFreq = shootFreq;
         sType = shootType;
         this.projectileType = projectileType;
         this.sDensity = sDensity;
-        // this.projectileAttribute = projectileAttribute;
-
+        this.projectileAttribute = pAttribute;
     }
 
     // initialize after enums (2)
@@ -229,19 +181,4 @@ public class ShootProjectiles : MonoBehaviour
             directions = new float[maxProjectiles];
         }
     }
-
-    /* Assign the expected projectile spread for 2+ shots */
-    // public void setProjectileCount(int numProjectiles, string prefabName, float projectileSpd)
-    // {
-    //     projectileSpeed = projectileSpd;
-    //     projectileCt = numProjectiles;
-    //     directions = new float[projectileCt];
-    //     projectilePrefab = Resources.Load<GameObject>("Prefabs/" + prefabName);
-
-    //     float angleBetweenShots = 60f / (numProjectiles + 2);
-
-    //     for (int i = 0; i < projectileCt; i++) {
-    //         directions[i] = i * .8f * angleBetweenShots;
-    //     }
-    // }
 }

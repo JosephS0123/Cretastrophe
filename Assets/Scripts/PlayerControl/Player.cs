@@ -179,4 +179,16 @@ public class Player : MonoBehaviour
         controller.Move(velocity * Time.deltaTime, input);
         //Physics.SyncTransforms();
     }
+
+    // Helper functions for Projectile.cs
+    public Vector2 getPlayerVelocity()
+    {
+        return velocity;
+    }
+
+    // Helper functions for Projectile.cs
+    public void updatePlayerVelocity(Vector2 velocity)
+    {
+        this.velocity = velocity;
+    }
 }
