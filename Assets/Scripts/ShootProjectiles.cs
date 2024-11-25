@@ -180,5 +180,10 @@ public class ShootProjectiles : MonoBehaviour
         } else {
             directions = new float[maxProjectiles];
         }
+
+        if (projectileType == Projectile.projectileType.blackhole) {
+            fireRate = 5f;
+            this.projectileSpeed = 2f;
+        }
     }
 }

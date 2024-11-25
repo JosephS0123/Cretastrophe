@@ -16,6 +16,7 @@ public class Projectile : MonoBehaviour
         make sure sticky doesnt destroy on impact
     */
     public enum projectileAttribute {sticky, nonsticky, tracking, fire, ice};
+    public enum projectileMobility {immobile, mobile};
     public projectileType projectileT; // projectileType.spike  is default
     public projectileAttribute projectileA = projectileAttribute.nonsticky;
     private float distanceTilDespawn = 20f;
@@ -24,71 +25,106 @@ public class Projectile : MonoBehaviour
     /* player tracking stuff */
     GameObject player;
     private Player playerScript;
+    public projectileMobility pMobility = projectileMobility.mobile;
 
     private float timer = 0;
     /* blackhole */
     public float projectileLifetime = 15f; // time in seconds before blackhole despawns
-    private float pullRadius = 3.5f; // distance that player must be within to be affected by gravity
+    public float pullRadius = 3.5f; // distance that player must be within to be affected by gravity
     private float maxPullStrength = 3f;
     private Controller2D playerController;
     public float pullAccelerationTime = 10f;
     private float pullTimer = 0f;
     private bool killingPlayer = false;
-    private float timeTilDeath = 60f;
+    private int timeTilDeath = 60;
 
     /* for boomerang behavior */
     private float timeTilReturn;
     private bool isReturning;
     private bool runTimer = false;
 
+    /* For shrinking player in blakc hoel*/
+    private int tick = 5;
+    public bool canShrinkPlayer = false;
+
     void Start()
     {
-        float angleInRadians = direction * Mathf.Deg2Rad;
-        angleInRadians += (angleInRadians > 1.55f) ? -.2f : .2f;
-        Vector2 directionVector = new Vector2(Mathf.Cos(angleInRadians), Mathf.Sin(angleInRadians));
-        rb = GetComponent<Rigidbody2D>();
-        
-        rb.velocity = directionVector.normalized * speed; 
-        transform.rotation = Quaternion.Euler(new Vector3(0, 0, direction));
-        startPos = (Vector2)transform.position;
+        if (pMobility == projectileMobility.immobile) {
+            rb = GetComponent<Rigidbody2D>();
 
-        setProjectileLifetime();
+            rb.velocity = Vector2.zero;
+            rb.gravityScale = 0;
+            startPos = (Vector2)transform.position;
 
-        switch (projectileT)
-        {
-            case projectileType.boomerang:
-                isReturning = false;
-                break;
-            case projectileType.blackhole:
-                projectileLifetime = 15f; 
-                pullRadius = 5f;
 
-                player = GameObject.Find("Player");
-                if (player == null) {
-                    Debug.Log("PLAYER NOT FOUND IN PROJECTILE.CS \nDestroying projectile object!");
-                    Debug.Log("PLAYER NOT FOUND IN PROJECTILE.CS \nDestroying projectile object!");
-                    Debug.Log("PLAYER NOT FOUND IN PROJECTILE.CS \nDestroying projectile object!");
-                    Debug.Log("PLAYER NOT FOUND IN PROJECTILE.CS \nDestroying projectile object!");
-                    Debug.Log("PLAYER NOT FOUND IN PROJECTILE.CS \nDestroying projectile object!");
-                } else {
-                    playerController = player.GetComponent<Controller2D>();
-                    playerScript = player.GetComponent<Player>();
-                }
-                break;
-            default:
-                break;
+            switch (projectileT)
+            {
+                case projectileType.blackhole:
+                    pullRadius = 5f;
+
+                    player = GameObject.Find("Player");
+                    if (player == null) {
+                        Debug.Log("PLAYER NOT FOUND IN PROJECTILE.CS \nDestroying projectile object!");
+                        Debug.Log("PLAYER NOT FOUND IN PROJECTILE.CS \nDestroying projectile object!");
+                        Debug.Log("PLAYER NOT FOUND IN PROJECTILE.CS \nDestroying projectile object!");
+                        Debug.Log("PLAYER NOT FOUND IN PROJECTILE.CS \nDestroying projectile object!");
+                        Debug.Log("PLAYER NOT FOUND IN PROJECTILE.CS \nDestroying projectile object!");
+                    } else {
+                        playerController = player.GetComponent<Controller2D>();
+                        playerScript = player.GetComponent<Player>();
+                    }
+                    break;
+                default:
+                    break;
+            }
+        } else {
+            float angleInRadians = direction * Mathf.Deg2Rad;
+            angleInRadians += (angleInRadians > 1.55f) ? -.2f : .2f;
+            Vector2 directionVector = new Vector2(Mathf.Cos(angleInRadians), Mathf.Sin(angleInRadians));
+            rb = GetComponent<Rigidbody2D>();
+            
+            rb.velocity = directionVector.normalized * speed; 
+            transform.rotation = Quaternion.Euler(new Vector3(0, 0, direction));
+            startPos = (Vector2)transform.position;
+
+            setProjectileLifetime();
+
+            switch (projectileT)
+            {
+                case projectileType.boomerang:
+                    isReturning = false;
+                    break;
+                case projectileType.blackhole:
+                    projectileLifetime = 15f; 
+                    pullRadius = 5f;
+
+                    player = GameObject.Find("Player");
+                    if (player == null) {
+                        Debug.Log("PLAYER NOT FOUND IN PROJECTILE.CS \nDestroying projectile object!");
+                        Debug.Log("PLAYER NOT FOUND IN PROJECTILE.CS \nDestroying projectile object!");
+                        Debug.Log("PLAYER NOT FOUND IN PROJECTILE.CS \nDestroying projectile object!");
+                        Debug.Log("PLAYER NOT FOUND IN PROJECTILE.CS \nDestroying projectile object!");
+                        Debug.Log("PLAYER NOT FOUND IN PROJECTILE.CS \nDestroying projectile object!");
+                    } else {
+                        playerController = player.GetComponent<Controller2D>();
+                        playerScript = player.GetComponent<Player>();
+                    }
+                    break;
+                default:
+                    break;
+            }
         }
     }
 
     void FixedUpdate()
     {
         // bullet goes out of bounds 
-        if (Vector2.Distance((Vector2)transform.position, startPos) >= distanceTilDespawn)
+        if (pMobility == projectileMobility.mobile && Vector2.Distance((Vector2)transform.position, startPos) >= distanceTilDespawn)
         {
             Destroy(gameObject);
         }
 
-        if (runTimer) {
+        if (runTimer && pMobility == projectileMobility.mobile) {
             timer += Time.deltaTime;
             if (timer >= projectileLifetime) {
                 Destroy(gameObject);
@@ -110,7 +146,7 @@ public class Projectile : MonoBehaviour
                 }
                 break;
             case projectileType.blackhole:
-                if (!runTimer) {
+                if ((pMobility == projectileMobility.mobile) && !runTimer) {
                     doRunTimer();
                 }
 
@@ -123,7 +159,7 @@ public class Projectile : MonoBehaviour
 
                 doBlackHole();
 
-                if (timer >= projectileLifetime) {
+                if (pMobility == projectileMobility.mobile && timer >= projectileLifetime) {
                     Destroy(gameObject);
                 }
                 break;
@@ -142,7 +178,13 @@ public class Projectile : MonoBehaviour
         // If the player is within range, start pulling
         if (distance <= pullRadius)
         {
-            if (distance <= .5f) {timeTilDeath--;}
+            if (distance <= .5f) {
+                timeTilDeath--;
+                if (canShrinkPlayer && timeTilDeath/10 % 6 == tick) {
+                    tick--;
+                    Shrink();
+                }
+            }
             Vector2 directionToBlackHole = (blackHolePosition - playerPosition).normalized;
 
             float pullStrength = Mathf.Clamp01(1 - (distance / pullRadius)) * maxPullStrength;
@@ -171,7 +213,7 @@ public class Projectile : MonoBehaviour
         playerScript.updatePlayerVelocity(currentVelocity + pullVelocity);
 
         // Update the player's movement
-        playerController.Move(playerScript.getPlayerVelocity() * Time.deltaTime, Vector2.zero); 
+        playerController.Move((currentVelocity + pullVelocity)* Time.deltaTime, Vector2.zero); 
     }
 
     
@@ -302,6 +344,17 @@ public class Projectile : MonoBehaviour
             default:
                 break;
         }
+    }
+
+    private float shrinkFactor = 1f;
+    public void Shrink()
+    {
+        shrinkFactor /= 1.4f;
+        // Get the current local scale of the object
+        Vector3 currentScale = player.transform.localScale;
+
+        // Shrink the object by multiplying its scale by the shrink factor
+        player.transform.localScale = currentScale * shrinkFactor;
     }
 
 }
