@@ -271,7 +271,7 @@ public class DrawManager : MonoBehaviour
             
         }
 
-        Collider2D[] colliders = Physics2D.OverlapCircleAll(curPos, _linePrefab._renderer.startWidth - .03f);
+        Collider2D[] colliders = Physics2D.OverlapCircleAll(curPos, _whiteLinePrefab._renderer.startWidth - .03f);
 
         foreach (Collider2D collider2D in colliders)
         {
