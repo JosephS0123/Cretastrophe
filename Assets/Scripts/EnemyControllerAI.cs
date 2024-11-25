@@ -12,7 +12,8 @@ using UnityEngine;
 public class EnemyControllerAI : MonoBehaviour
 {
     /* enemy state management */
-    private enum MoveType {straight, freefall, reverse, idle, startJump, midJump, fallOff};
+    private enum MoveType   {   straight, freefall, reverse, idle, startJump, midJump, fallOff };
+    private float stopJumpAtX;
     /*  combatMove is chase and run
         combatStill is sit and shoot
         mobile is just moving around
@@ -91,7 +92,7 @@ public class EnemyControllerAI : MonoBehaviour
         4 = LOS detection
         10 = everything
     */
-    public int debugCode = 0; 
+    public int debugCode = 1; 
     
     /* or should be an Awake() method? */
     void Start()
@@ -180,7 +181,7 @@ public class EnemyControllerAI : MonoBehaviour
     // "Resets" position trackers due to transitions from certain enemy states 
     void clearOldPositions()
     {
-        prevPos = transform.position - new Vector3(1f, 1f, 0);
+        prevPos = transform.position - new Vector3(10f, 10f, 0);
         prevPrevPos = prevPos - new Vector3(5f, 5f, 0);
         prevLookingRight = !isFacingRight;
         prevPrevLookingRight = !prevLookingRight;
@@ -352,9 +353,14 @@ public class EnemyControllerAI : MonoBehaviour
                 movetype = MoveType.midJump;
                 break;
             case MoveType.midJump:
-                MoveForward();
+                // Have we reached the stop point? Either the middle of the jump.x or the supposed end.x
+                if (lookDirection.x > 0 ? (stopJumpAtX <= transform.position.x) : (stopJumpAtX >= transform.position.x)) {
+                    movetype = MoveType.freefall;
+                } else {
+                    MoveForward();
+                }
                 break;
-            case MoveType.fallOff:
+            case MoveType.fallOff: // move forward til not grounded
                 MoveForward();
                 break;
             case MoveType.freefall:
@@ -381,17 +387,16 @@ public class EnemyControllerAI : MonoBehaviour
 
         /* sudden contact with ground mid jump cancels forward motion*/
         if (!onGround) {
-            if (movetype == MoveType.midJump) {
-                movetype = MoveType.midJump;
-            } else {
+            if (movetype != MoveType.midJump) {
+                /* this can cause issues if the enemy moves to fast and it lifts off ground*/
                 movetype = MoveType.freefall;
             }
         } else {
             if (IsWallAhead())
             {
-                if (IsSlope()){
+                if (IsIncliningSlope()){
                     movetype = MoveType.straight;
-                } else {
+                } else { /* check other paths since its an obstacle you cant walk over */
                     if (CanJump()) {
                         if (rollDice(.8f)) {
                             movetype = MoveType.startJump;
@@ -485,8 +490,8 @@ public class EnemyControllerAI : MonoBehaviour
 
     /* Might need an overhaul or not*/
     /* If its not a wall ahead then yea, prob a slope, there might be missing edge case considerations
-        though*/
-    bool IsSlope()
+        though; checks only for a declining slope*/
+    bool IsIncliningSlope()
     {
         /* .8 / .85f may be a stretch to try */
         float vertRayLengthDown = .9f * enemyHeight; 
@@ -547,6 +552,32 @@ public class EnemyControllerAI : MonoBehaviour
         return frontHit.collider == null;
     }
 
+    bool isGroundBelow()
+    {
+        float vertRayLength = 6 * enemyHeight;
+        float xOffset = enemyWidth/2;
+
+        // Cast the vertical rays downwards
+        Vector2 frontRayOrigin = (Vector2)transform.position + new Vector2 (lookDirection.x * xOffset, -enemyHeight/2f); 
+        Vector2 middleRayOrigin = (Vector2)transform.position + new Vector2 (0, -enemyHeight/2f); 
+        Vector2 backRayOrigin = (Vector2)transform.position + new Vector2 (-lookDirection.x * xOffset, -enemyHeight/2f); 
+        RaycastHit2D frontHit = Physics2D.Raycast(frontRayOrigin, Vector2.down, vertRayLength, groundLayer);
+        RaycastHit2D middleHit = Physics2D.Raycast(middleRayOrigin, Vector2.down, vertRayLength, groundLayer);
+        RaycastHit2D backHit = Physics2D.Raycast(backRayOrigin, Vector2.down, vertRayLength, groundLayer);
+        Debug.DrawRay(frontRayOrigin, Vector2.down * vertRayLength, Color.red);
+        Debug.DrawRay(middleRayOrigin, Vector2.down * vertRayLength, Color.red);
+        Debug.DrawRay(backRayOrigin, Vector2.down * vertRayLength, Color.red);
+
+        // No safe ground was in contact if null therefore unsafe
+        // ignore back origin if its the only contact and no grounded
+
+        if (!IsGrounded()) {
+            return (frontHit.collider != null) || (middleHit.collider != null) || (backHit.collider != null);
+        } else {
+            return (frontHit.collider != null) || (middleHit.collider != null);
+        }
+    }
+
     /* Makes sure the enemy's movement is synced with class vars */
     void SetLookDirection() 
     {
@@ -561,17 +592,25 @@ public class EnemyControllerAI : MonoBehaviour
     {
         float effectiveGravity = rb.gravityScale * Physics2D.gravity.y;
         float maxHeight = jumpForce * jumpForce / (2f * Mathf.Abs(effectiveGravity));
-        float enemyHeightTemp = 0;
 
-        // Cast vertical ray to simulate the max height enemy can make straight up
-        Vector2 vertRayOrigin = (Vector2)transform.position + new Vector2(lookDirection.x * (enemyWidth / 2), -enemyHeight / 2);
-        RaycastHit2D vertHit = Physics2D.Raycast(vertRayOrigin, Vector2.up, maxHeight, groundLayer);
+        // See if there is immediate ceiling above enemy rn
+        Vector2 fwdCeilingCheckOrigin = (Vector2)transform.position + new Vector2(lookDirection.x * enemyWidth / 2, enemyHeight / 2);
+        Vector2 bkwdCeilingCheckOrigin = (Vector2)transform.position + new Vector2(-lookDirection.x * enemyWidth / 2, enemyHeight / 2);
+
+        RaycastHit2D fwdCeilingHit = Physics2D.Raycast(fwdCeilingCheckOrigin, Vector2.up, maxHeight, groundLayer);
+        RaycastHit2D bkwdCeilingHit = Physics2D.Raycast(bkwdCeilingCheckOrigin, Vector2.up, maxHeight, groundLayer);
+
+        bool left = fwdCeilingHit.collider != null;
+        bool right = bkwdCeilingHit.collider != null;
 
         // If the vertical ray hit something, calculate the new max achievable height
-        if (vertHit.collider != null)
+        if (left && right)
         {
-            maxHeight = vertHit.point.y - (transform.position.y + enemyHeight / 2);
-            enemyHeightTemp = enemyHeight;
+            maxHeight = Math.Min(fwdCeilingHit.point.y, bkwdCeilingHit.point.y) - (transform.position.y + enemyHeight / 2);
+        } else if (left) {
+            maxHeight = fwdCeilingHit.point.y - (transform.position.y + enemyHeight/2);
+        } else if (right) {
+            maxHeight = bkwdCeilingHit.point.y - (transform.position.y + enemyHeight/2);
         }
 
         // Update relevant vars based on maxHeight
@@ -579,35 +618,98 @@ public class EnemyControllerAI : MonoBehaviour
         float totalJumpTime = 2 * timeToMaxHeight; // Time to ascend and descend
         float horizontalDistance = moveSpeed * totalJumpTime;
 
-        // Calculate ray origins
-        // Should be at the apex of the jump - if the jump was cut short then subtract by enemyHeight to accomodate height diff
-        Vector2 horizRayOrigin = (Vector2)transform.position + new Vector2(lookDirection.x * (enemyWidth / 2), maxHeight - (enemyHeightTemp / 2)); // apex position
-        // Check if it can land (assuming that there is a wall past the apex)
-        Vector2 downRayOriginMid = horizRayOrigin + lookDirection * (horizontalDistance / 2);
-        // otherwise if it can land a clean jump to the end, do so
-        Vector2 downRayOriginEnd = horizRayOrigin + lookDirection * horizontalDistance;
+        // calculate if enough clearance for enemy to jump to apex
+        Vector2 topHorizontalRayOrigin = (Vector2)transform.position + new Vector2(-lookDirection.x * enemyWidth / 2, maxHeight + enemyHeight/2); // apex position
+        Vector2 bottomHorizontalRayOrigin = (Vector2)transform.position + new Vector2(-lookDirection.x * enemyWidth / 2, maxHeight - enemyHeight/2); // apex position
 
         // Cast the horizontal ray (is path clear to land around apex)
-        RaycastHit2D horizHit = Physics2D.Raycast(horizRayOrigin, lookDirection, horizontalDistance, groundLayer);
+        RaycastHit2D topHorizHit = Physics2D.Raycast(topHorizontalRayOrigin, lookDirection, horizontalDistance/2 + enemyWidth, groundLayer);
+        RaycastHit2D bottomHorizHit = Physics2D.Raycast(bottomHorizontalRayOrigin, lookDirection, horizontalDistance/2 + enemyWidth, groundLayer);
 
-        // Check downward rays | allows jump to land further down if need be
-        float downRayLength = maxHeight + 5 * enemyHeight; // Length of downward rays
+        bool top = topHorizHit.collider != null;
+        bool bottom = bottomHorizHit.collider != null;
+        float maxDistX;
+
+        // check how far can move in x before hitting head
+        if (top && bottom) {
+            maxDistX = (lookDirection.x >= 0) ? Math.Min(topHorizHit.point.x, bottomHorizHit.point.x) : Math.Max(topHorizHit.point.x, bottomHorizHit.point.x);
+            RaycastHit2D temp = Physics2D.Raycast(new Vector2(maxDistX - lookDirection.x * .1f, bottomHorizHit.point.y), Vector2.down, maxHeight + 5*enemyHeight, groundLayer);
+            Debug.DrawRay(new Vector2(maxDistX - lookDirection.x * .1f, bottomHorizHit.point.y), Vector2.down * (maxHeight + 5*enemyHeight), Color.magenta);
+            if (temp.collider != null) {
+                /* can jump to midpoint*/
+                /* set movetype to move until maxDistX*/
+                stopJumpAtX = maxDistX;
+                return true; /*TODO maybe fix logic here*/
+            }
+        } else if (top) {
+            maxDistX = (lookDirection.x >= 0) ? Math.Min(topHorizHit.point.x, bottomHorizHit.point.x) : Math.Max(topHorizHit.point.x, bottomHorizHit.point.x);
+            RaycastHit2D temp = Physics2D.Raycast(new Vector2(maxDistX - lookDirection.x * .1f, topHorizHit.point.y), Vector2.down, maxHeight + 5*enemyHeight, groundLayer);
+            Debug.DrawRay(new Vector2(maxDistX - lookDirection.x * .1f, bottomHorizHit.point.y), Vector2.down * (maxHeight + 5*enemyHeight), Color.magenta);
+            if (temp.collider != null) {
+                /* can jump to midpoint*/
+                /* set movetype to move until maxDistX*/
+                stopJumpAtX = maxDistX;
+                return true; /*TODO maybe fix logic here*/
+            }
+        } else if (bottom) {
+            maxDistX = (lookDirection.x >= 0) ? Math.Min(topHorizHit.point.x, bottomHorizHit.point.x) : Math.Max(topHorizHit.point.x, bottomHorizHit.point.x);
+            RaycastHit2D temp = Physics2D.Raycast(new Vector2(maxDistX - lookDirection.x * .1f, bottomHorizHit.point.y), Vector2.down, maxHeight + 5*enemyHeight, groundLayer);
+            Debug.DrawRay(new Vector2(maxDistX - lookDirection.x * .1f, bottomHorizHit.point.y), Vector2.down * (maxHeight + 5*enemyHeight), Color.magenta);
+            if (temp.collider != null) {
+                /* can jump to midpoint*/
+                /* set movetype to move until maxDistX*/
+                stopJumpAtX = maxDistX;
+                return true; /*TODO maybe fix logic here*/
+            }
+        } else {
+            maxDistX = lookDirection.x * horizontalDistance + transform.position.x;
+        }
+
+        /*TODO checkrightside  downwards rays*/
+        float downRayLength = maxHeight + enemyHeight/2; // Length of downward rays
+        // Check if it can land at the midpoint x of jump
+        Vector2 downRayOriginMid = (Vector2)transform.position + new Vector2(lookDirection.x * (horizontalDistance/2f + enemyWidth/2), -enemyHeight/2 + maxHeight);
+        // otherwise if it can land a clean jump to the end, do so
+        Vector2 downRayOriginLeftEnd = new Vector2(maxDistX - lookDirection.x * enemyWidth, transform.position.y - enemyHeight/2 + maxHeight/4);
+        Vector2 downRayOriginCenterEnd = new Vector2(maxDistX - lookDirection.x * enemyWidth/2, transform.position.y - enemyHeight/2 + maxHeight/4);
+        Vector2 downRayOriginRightEnd = new Vector2(maxDistX                                  , transform.position.y - enemyHeight/2 + maxHeight/4);
+        
         RaycastHit2D downHitMid = Physics2D.Raycast(downRayOriginMid, Vector2.down, downRayLength, groundLayer);
-        RaycastHit2D downHitEnd = Physics2D.Raycast(downRayOriginEnd, Vector2.down, downRayLength, groundLayer);
+        
+        RaycastHit2D downHitRightEnd = Physics2D.Raycast(downRayOriginRightEnd, Vector2.down, enemyHeight*10, groundLayer);
+        RaycastHit2D downHitCenterEnd = Physics2D.Raycast(downRayOriginCenterEnd, Vector2.down, enemyHeight*10, groundLayer);
+        RaycastHit2D downHitLeftEnd = Physics2D.Raycast(downRayOriginLeftEnd, Vector2.down, enemyHeight*10, groundLayer);
 
         // Draw rays for debugging
-        Debug.DrawRay(vertRayOrigin, Vector2.up * maxHeight, Color.red);
-        Debug.DrawRay(horizRayOrigin, lookDirection * horizontalDistance, Color.blue); // Horizontal ray
-        Debug.DrawRay(downRayOriginMid, Vector2.down * downRayLength, Color.red); // Mid downward ray
-        Debug.DrawRay(downRayOriginEnd, Vector2.down * downRayLength, Color.red); // End downward ray
+        Debug.DrawRay(fwdCeilingCheckOrigin, Vector2.up * maxHeight, Color.green);
+        Debug.DrawRay(bkwdCeilingCheckOrigin, Vector2.up * maxHeight, Color.green);
+        Debug.DrawRay(topHorizontalRayOrigin, lookDirection * horizontalDistance/2, Color.blue); // Horizontal ray
+        Debug.DrawRay(bottomHorizontalRayOrigin, lookDirection * horizontalDistance/2, Color.blue); // Horizontal ray
 
-        // Check conditions for jumping
-        if (horizHit.collider == null) {
-            if (downHitMid.collider != null || downHitEnd.collider != null) {
+        Debug.DrawRay(downRayOriginMid, Vector2.down * downRayLength, Color.red); // Mid downward ray
+        Debug.DrawRay(downRayOriginRightEnd, Vector2.down * enemyHeight*10, Color.red); // End downward ray
+        Debug.DrawRay(downRayOriginCenterEnd, Vector2.down * enemyHeight*10, Color.red); // End downward ray
+        Debug.DrawRay(downRayOriginLeftEnd, Vector2.down * enemyHeight*10, Color.red); // End downward ray
+        bool canJump = false;
+
+        // jump halfway
+        if (maxDistX >= (transform.position.x + lookDirection.x * horizontalDistance/2f + enemyWidth/2)) {
+            /* try jump to end*/
+            if (downHitMid.collider != null) {
+                // should check for worst case in the center jump?
+                canJump = true;
+                stopJumpAtX = maxDistX;
+                /* set center jump */
+            }
+        }
+        if (!top && !bottom) {
+            if ((downHitRightEnd.collider != null) || (downHitCenterEnd.collider != null) || (downHitLeftEnd.collider != null)) {
+                /* set center jump = false*/
+                stopJumpAtX = maxDistX;
                 return true;
             }
         }
-        return false;
+        return canJump;
     }
 
 
@@ -616,7 +718,7 @@ public class EnemyControllerAI : MonoBehaviour
     {
         float rayOffsetY = enemyHeight/2 + .02f;
 
-        Vector2 bottomRayOrigin = (Vector2)transform.position + new Vector2 (-lookDirection.x * enemyWidth/2 + .03f, -rayOffsetY); 
+        Vector2 bottomRayOrigin = (Vector2)transform.position + new Vector2 (-lookDirection.x * enemyWidth/2 , -rayOffsetY); 
         RaycastHit2D bottomRayImmediate = Physics2D.Raycast(bottomRayOrigin, lookDirection, enemyWidth, groundLayer);
         Debug.DrawRay(bottomRayOrigin, lookDirection * enemyWidth, Color.green);
         
@@ -697,10 +799,10 @@ public class EnemyControllerAI : MonoBehaviour
     {
         if (((1 << other.gameObject.layer) & playerLayer) != 0)
         {
-            if (playerDetectionCollider != null && !other.IsTouching(playerDetectionCollider)) {
+            if (playerDetectionCollider != null && !other.IsTouching(playerDetectionCollider) && IsGrounded()) {
                 /* Set default move behavior*/
                 Debug.Log("Player left aggro range!");
-                statetype = StateType.mobile;
+                statetype = defaultStateMobileType;
                 movetype = MoveType.freefall;
                 DoFall();
             }
@@ -717,6 +819,7 @@ public class EnemyControllerAI : MonoBehaviour
     void updateCombatStill()
     {
         GetPlayerPosition();
+        rb.velocity = Vector3.zero; // ensure no movement while still
 
         /* update enemy look direction when trying to shoot */
         if (playerPosition.x - transform.position.x > 0 && !isFacingRight){
