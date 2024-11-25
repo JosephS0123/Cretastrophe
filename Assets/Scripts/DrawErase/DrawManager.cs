@@ -296,22 +296,38 @@ public class DrawManager : MonoBehaviour
         screenClearInstance = Instantiate(screenClear, Vector3.zero, Quaternion.identity);
     }
 
-    public void changeColor(String color)
+    public void changeColor(int index)
     {
-        if (color == "white")
+
+        //White chalk
+        if (index == 0)
         {
+            canDrawWhite = true;
+            canDrawRed = false;
+            canDrawBlue = false;
             _linePrefab = _whiteLinePrefab;
             _chalkManager = _whiteChalkManager;
+            isDynamic = false;
         }
-        else if (color == "red")
+        //Fire chalk
+        else if (index == 1)
         {
+            canDrawWhite = false;
+            canDrawRed = true;
+            canDrawBlue = false;
             _linePrefab = _redLinePrefab;
             _chalkManager = _redChalkManager;
+            isDynamic = false;
         }
-        else if (color == "blue")
+        //Ice chalk
+        else if (index == 2)
         {
+            canDrawWhite = false;
+            canDrawRed = false;
+            canDrawBlue = true;
             _linePrefab = _blueLinePrefab;
             _chalkManager = _blueChalkManager;
+            isDynamic = true;
         }
     }
 }

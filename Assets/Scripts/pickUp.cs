@@ -11,25 +11,27 @@ public class Pickup : MonoBehaviour
     // This function is called when another collider enters the trigger collider attached to this GameObject
     private void OnTriggerEnter2D(Collider2D collision)
     {
-        AudioSource.PlayClipAtPoint(drawSound, transform.position);
-
-         if (chalkUI != null)
+        if (collision.tag == "Player")
         {
-            chalkUI.SetActive(true);  // Shows the chalk UI
-        }
+            AudioSource.PlayClipAtPoint(drawSound, transform.position);
 
-        if(drawManager != null)
-        {
-            drawManager.SetActive(true); //Enables drawing
-        }
+            if (chalkUI != null)
+            {
+                chalkUI.SetActive(true);  // Shows the chalk UI
+            }
 
-        if(chalkBar != null)
-        {
-            chalkBar.SetActive(true);
-        }
-        // Destroy the item after it's collision triggered
-        Destroy(gameObject);
+            if(drawManager != null)
+            {
+                drawManager.SetActive(true); //Enables drawing
+            }
 
-        
+            if(chalkBar != null)
+            {
+                chalkBar.SetActive(true);
+            }
+            // Destroy the item after it's collision triggered
+            Destroy(gameObject);
+            }
+            
     }
 }

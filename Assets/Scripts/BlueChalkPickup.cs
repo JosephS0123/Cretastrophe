@@ -3,9 +3,10 @@ using UnityEngine;
 public class NewChalk : MonoBehaviour
 {
 
-     //public GameObject chalkUI; //UI Ref
+     public GameObject chalkUI; //UI Ref
      public AudioClip drawSound; //Sound effect
      public DrawManager drawManager; //DrawManager ref
+     public GameObject drawManagerObj; //DrawManager ref
      public GameObject chalkBar;
 
     // This function is called when another collider enters the trigger collider attached to this GameObject
@@ -15,13 +16,14 @@ public class NewChalk : MonoBehaviour
         {
             AudioSource.PlayClipAtPoint(drawSound, transform.position);
 
-            //if (chalkUI != null)
-            //{
-            //    chalkUI.SetActive(true);  // Shows the chalk UI
-            //}
+            if (chalkUI != null)
+            {
+                chalkUI.SetActive(true);  // Shows the chalk UI
+            }
 
             if (drawManager != null)
             {
+                drawManagerObj.SetActive(true); //Enables drawing
                 drawManager.canDrawBlue = true; //Enables drawing
             }
 
