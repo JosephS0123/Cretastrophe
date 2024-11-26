@@ -286,7 +286,7 @@ public class DrawManager : MonoBehaviour
                 {
                     return false;
                 }
-                if(isDynamic && _tag == "White" || _tag == "Red")
+                if(isDynamic && (_tag == "White" || _tag == "Red"))
                 {
                     return false;
                 }
