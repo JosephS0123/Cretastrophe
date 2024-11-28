@@ -12,6 +12,7 @@ TagManager:
   - PhysicsObj
   - BlueLine
   - Ground
+  - Lava
   layers:
   - Default
   - TransparentFX
@@ -66,4 +67,7 @@ TagManager:
     locked: 0
   - name: Ground
     uniqueID: 1024043353
+    locked: 0
+  - name: Eraser
+    uniqueID: 532178899
     locked: 0

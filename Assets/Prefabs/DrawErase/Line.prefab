@@ -51,6 +51,9 @@ MonoBehaviour:
   _collider: {fileID: -958014405256141648}
   _chalkManager: {fileID: 0}
   dynamicLineParent: {fileID: 0}
+  touchedLava: 0
+  heatLevel: 0
+  inLava: 0
 --- !u!120 &1120676243342914910
 LineRenderer:
   serializedVersion: 2
@@ -93,7 +96,8 @@ LineRenderer:
   m_SortingLayerID: -1725398505
   m_SortingLayer: 1
   m_SortingOrder: 0
-  m_Positions: []
+  m_Positions:
+  - {x: 0, y: 0, z: 0}
   m_Parameters:
     serializedVersion: 3
     widthMultiplier: 1
@@ -207,7 +211,7 @@ Rigidbody2D:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1821888897524060959}
-  m_BodyType: 2
+  m_BodyType: 1
   m_Simulated: 1
   m_UseFullKinematicContacts: 0
   m_UseAutoMass: 0
