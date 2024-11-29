@@ -346,22 +346,24 @@ public class DrawManager : MonoBehaviour
 
     public void createLine(int index, Line oldLine)
     {
-        if(index == 1)
+        if(oldLine._renderer.positionCount > 1)
         {
-            Line newLine = Instantiate(_redLinePrefab, oldLine.transform.position, Quaternion.identity, _parent.transform);
-            newLine._chalkManager = _redChalkManager;
-            newLine.SetPosition(oldLine._renderer.GetPosition(0) + oldLine.transform.position);
-            newLine.SetPosition(oldLine._renderer.GetPosition(1) + oldLine.transform.position);
+            if (index == 1)
+            {
+                Line newLine = Instantiate(_redLinePrefab, oldLine.transform.position, Quaternion.identity, _parent.transform);
+                newLine._chalkManager = _redChalkManager;
+                newLine.SetPosition(oldLine._renderer.GetPosition(0) + oldLine.transform.position);
+                newLine.SetPosition(oldLine._renderer.GetPosition(1) + oldLine.transform.position);
+            }
+            else if (index == 2)
+            {
+                Line newLine = Instantiate(_whiteLinePrefab, oldLine.transform.position, Quaternion.identity, _parent.transform);
+                newLine._chalkManager = _whiteChalkManager;
+                newLine.SetPosition(oldLine._renderer.GetPosition(0) + oldLine.transform.position);
+                newLine.SetPosition(oldLine._renderer.GetPosition(1) + oldLine.transform.position);
+                newLine.touchedLava = true;
+            }
         }
-        else if(index == 2)
-        {
-            Line newLine = Instantiate(_whiteLinePrefab, oldLine.transform.position, Quaternion.identity, _parent.transform);
-            newLine._chalkManager = _whiteChalkManager;
-            newLine.SetPosition(oldLine._renderer.GetPosition(0) + oldLine.transform.position);
-            newLine.SetPosition(oldLine._renderer.GetPosition(1) + oldLine.transform.position);
-            newLine.touchedLava = true;
-        }
-        
     }
 
     public void updateDynamicParent(GameObject newParent)

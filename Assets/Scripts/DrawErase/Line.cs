@@ -291,6 +291,14 @@ public class Line : MonoBehaviour
                             child.gameObject.GetComponent<Line>().EraseDynamic();
                         }
                     }
+                    else
+                    {
+                        foreach (Transform child in children)
+                        {
+                            _drawManager.createLine(2, child.gameObject.GetComponent<Line>());
+                            child.gameObject.GetComponent<Line>().EraseDynamic();
+                        }
+                    }
                 }
                 else
                 {
@@ -301,7 +309,8 @@ public class Line : MonoBehaviour
         }
         else
         {
-            if(gameObject.CompareTag("BlueLine") && (gameObject.transform.parent.GetComponent<Rigidbody2D>().bodyType == RigidbodyType2D.Dynamic))
+            Rigidbody2D _rb = gameObject.transform.parent.GetComponent<Rigidbody2D>();
+            if(gameObject.CompareTag("BlueLine") && _rb != null && (_rb.bodyType == RigidbodyType2D.Dynamic))
             {
                 heatLevel += Time.deltaTime * 1.5f;
             }

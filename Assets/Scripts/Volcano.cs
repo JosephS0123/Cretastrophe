@@ -6,6 +6,7 @@ public class Volcano : MonoBehaviour
 {
     public GameObject lava;
     public GameObject blast;
+    public GameObject spout;
 
     private Transform lavaTransform;
     
@@ -18,17 +19,22 @@ public class Volcano : MonoBehaviour
     public float blastTime;
     private bool blasting;
     public float offset;
+    public float blastSize;
 
     void Start()
     {
+        percentRisen = 0 - offset * 1/riseTime;
         lavaTransform = lava.GetComponent<Transform>();
         lavaPosMin = (lavaPosMin * transform.localScale.y);
         lavaPosMax = (lavaPosMax * transform.localScale.y);
         blast.SetActive(false);
+        spout.SetActive(false);
+        lava.SetActive(true);
         blasting = false;
 
-        blasting = true;
-        StartCoroutine(blastWait(offset));
+        blast.GetComponent<SpriteRenderer>().size = new Vector2(0.62f, blastSize);
+        blast.transform.position = (blastSize/2) * transform.up + transform.position;
+        spout.transform.position = (blastSize-.12f) * transform.up + transform.position;
     }
 
     
@@ -57,6 +63,7 @@ public class Volcano : MonoBehaviour
     {
         blasting = true;
         blast.SetActive(true);
+        spout.SetActive(true);
         lava.SetActive(false);
         StartCoroutine(blastWait(blastTime));
     }
@@ -66,6 +73,21 @@ public class Volcano : MonoBehaviour
         yield return new WaitForSeconds(time);
         blasting = false;
         blast.SetActive(false);
+        spout.SetActive(false);
         lava.SetActive(true);
+    }
+
+    void OnDrawGizmos()
+    {
+        
+        Gizmos.color = Color.red;
+        float size = .3f;
+
+        
+        Vector3 globalWaypointPos = (blastSize - .12f) * transform.up + transform.position;
+        Gizmos.DrawLine(globalWaypointPos - Vector3.up * size, globalWaypointPos + Vector3.up * size);
+        Gizmos.DrawLine(globalWaypointPos - Vector3.left * size, globalWaypointPos + Vector3.left * size);
+        
+        
     }
 }

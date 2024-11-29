@@ -21,6 +21,7 @@ public class CameraTest : MonoBehaviour
     float smoothVelocityY;
 
     bool lookAheadStopped;
+    public bool lookAheadForwardOnly;
 
     void Start()
     {
@@ -40,6 +41,10 @@ public class CameraTest : MonoBehaviour
             {
                 lookAheadStopped = false;
                 targetLookAheadX = lookAheadDirX * lookAheadDstX;
+                if(lookAheadForwardOnly && lookAheadDirX < 0)
+                {
+                    targetLookAheadX = 0;
+                }
             }
             else
             {
