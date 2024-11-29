@@ -5,6 +5,8 @@ using UnityEngine;
 public class Burnable : MonoBehaviour
 {
     public GameObject fire;
+    public GameObject destroyEffect;
+    public GameObject crateSprite;
     public LayerMask burnableLayer;
     public float fireSpreadRange;
     public float burnTime;
@@ -15,6 +17,7 @@ public class Burnable : MonoBehaviour
     void Start()
     {
         fire.SetActive(false);
+        destroyEffect.SetActive(false);
     }
 
     // Update is called once per frame
@@ -37,7 +40,7 @@ public class Burnable : MonoBehaviour
     public void HeatUp()
     {
         heatLevel += Time.deltaTime;
-        if(heatLevel >= timeToBurn)
+        if(heatLevel >= timeToBurn && !onFire)
         {
             SetOnFire();
         }
@@ -54,6 +57,16 @@ public class Burnable : MonoBehaviour
     private IEnumerator burnWait(float time)
     {
         yield return new WaitForSeconds(time);
+        //Destroy(gameObject);
+        fire.SetActive(false);
+        crateSprite.SetActive(false);
+        destroyEffect.SetActive(true);
+        StartCoroutine(destroyWait());
+    }
+
+    private IEnumerator destroyWait()
+    {
+        yield return new WaitForSeconds(0.18f);
         Destroy(gameObject);
     }
 }
