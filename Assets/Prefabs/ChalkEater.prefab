@@ -285,3 +285,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   range: 5
+  chalkLayer:
+    serializedVersion: 2
+    m_Bits: 128

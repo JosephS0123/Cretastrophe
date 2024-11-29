@@ -20,6 +20,7 @@ public class Volcano : MonoBehaviour
     private bool blasting;
     public float offset;
     public float blastSize;
+    float cycleTime;
 
     void Start()
     {

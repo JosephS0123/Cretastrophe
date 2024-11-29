@@ -9,6 +9,7 @@ public class ChalkEater : MonoBehaviour
     private AIDestinationSetter astar;
     public float range = 5f;
     Collider2D _collider;
+    public LayerMask chalkLayer;
     void Start()
     {
         astar = gameObject.GetComponent<AIDestinationSetter>();
@@ -18,7 +19,7 @@ public class ChalkEater : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        Collider2D[] colliders = Physics2D.OverlapCircleAll(transform.position, range);
+        Collider2D[] colliders = Physics2D.OverlapCircleAll(transform.position, range, chalkLayer);
         float minDistance = range;
         Collider2D closest = null;
         foreach (Collider2D collider2D in colliders)
