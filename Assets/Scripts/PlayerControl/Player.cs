@@ -37,6 +37,20 @@ public class Player : MonoBehaviour
 
     Controller2D controller;
 
+    //Respawn stuff
+    Vector2 startPos;
+    SpriteRenderer spriteRenderer;
+    Collider2D playerCollider;
+    public AudioClip deathSound; //Sound effect
+    public AudioClip respawnSound; //Sound effect
+    private bool isDead = false;
+
+    private void Awake()
+    {
+        spriteRenderer = GetComponent<SpriteRenderer>();
+        playerCollider = GetComponent<Collider2D>(); 
+    }
+
     void Start()
     {
         controller = GetComponent<Controller2D>();
@@ -44,6 +58,8 @@ public class Player : MonoBehaviour
         //gravity = -(2 * jumpHeight) / Mathf.Pow(timeToJumpApex, 2);
         //jumpVelocity = Mathf.Abs(gravity) * timeToJumpApex;
         jumpTimeElapsed = 0;
+        startPos = transform.position;
+        
     }
 
     void Update()
@@ -191,4 +207,28 @@ public class Player : MonoBehaviour
     {
         this.velocity = velocity;
     }
+
+    public void Die()
+    {
+        if (isDead) return;
+        isDead = true;
+        AudioSource.PlayClipAtPoint(deathSound, transform.position);
+        StartCoroutine(Respawn(1.0f));
+    }
+
+    IEnumerator Respawn(float duration)
+    {
+       
+        spriteRenderer.enabled = false;
+        playerCollider.enabled = false;
+        yield return new WaitForSeconds(duration);
+        AudioSource.PlayClipAtPoint(respawnSound, transform.position);
+        transform.position = startPos;
+        spriteRenderer.enabled = true;
+        playerCollider.enabled = true;
+        spriteRenderer.enabled = true;
+        isDead = false;
+        
+    }
+
 }

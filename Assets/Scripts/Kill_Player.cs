@@ -5,12 +5,14 @@ using UnityEngine.SceneManagement;
 
 public class Kill_Player : MonoBehaviour
 {
-    public GameObject player;
+    
+    private Player playerScript;
     public Transform respawnPoint;
+
     // Start is called before the first frame update
     void Start()
     {
-        
+        playerScript = FindObjectOfType<Player>();
     }
 
     // Update is called once per frame
@@ -22,7 +24,8 @@ public class Kill_Player : MonoBehaviour
     {
         if(other.gameObject.CompareTag("Player"))
         {
-            SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
+            playerScript.Die();
+            //SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
         }
     }
 }
