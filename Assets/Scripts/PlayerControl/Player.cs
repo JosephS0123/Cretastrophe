@@ -208,6 +208,11 @@ public class Player : MonoBehaviour
         this.velocity = velocity;
     }
 
+    public void updateCheckpoint(Vector2 pos)
+    {
+        startPos = pos;
+    }
+
     public void Die()
     {
         if (isDead) return;
