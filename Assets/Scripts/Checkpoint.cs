@@ -9,6 +9,7 @@ public class Checkpoint : MonoBehaviour
     public AudioClip checkpointSound; //Sound effect
     public GameObject animation;
     public GameObject flagActivatedSprite;
+    public GameObject flagDisactivatedSprite;
      
 
     Collider2D coll;
@@ -33,6 +34,7 @@ public class Checkpoint : MonoBehaviour
             AudioSource.PlayClipAtPoint(checkpointSound, transform.position);
             playerScript.updateCheckpoint(transform.position);
             animation.SetActive(true);
+            flagDisactivatedSprite.SetActive(false);
             flagActivatedSprite.SetActive(true);
             
             
