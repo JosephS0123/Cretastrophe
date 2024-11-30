@@ -218,6 +218,7 @@ public class Player : MonoBehaviour
         if (isDead) return;
         isDead = true;
         AudioSource.PlayClipAtPoint(deathSound, transform.position);
+        playerCollider.enabled = false;
         StartCoroutine(Respawn(1.0f));
     }
 
@@ -225,7 +226,7 @@ public class Player : MonoBehaviour
     {
        
         spriteRenderer.enabled = false;
-        playerCollider.enabled = false;
+        //playerCollider.enabled = false;
         yield return new WaitForSeconds(duration);
         AudioSource.PlayClipAtPoint(respawnSound, transform.position);
         transform.position = startPos;

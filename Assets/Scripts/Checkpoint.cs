@@ -7,13 +7,17 @@ public class Checkpoint : MonoBehaviour
 
     private Player playerScript;
     public AudioClip checkpointSound; //Sound effect
+    public GameObject animation;
+    public GameObject flagActivatedSprite;
+     
+
     Collider2D coll;
 
     // Start is called before the first frame update
     void Start()
     {
         coll = GetComponent<Collider2D>();
-        playerScript = FindObjectOfType<Player>();   
+        playerScript = FindObjectOfType<Player>();  
     }
 
     // Update is called once per frame
@@ -28,6 +32,10 @@ public class Checkpoint : MonoBehaviour
         {
             AudioSource.PlayClipAtPoint(checkpointSound, transform.position);
             playerScript.updateCheckpoint(transform.position);
+            animation.SetActive(true);
+            flagActivatedSprite.SetActive(true);
+            
+            
             coll.enabled = false;
             //SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
         }
