@@ -38,8 +38,6 @@ public class EnemyControllerAI : MonoBehaviour
     public ShootProjectiles.shootingDensity sDensity= ShootProjectiles.shootingDensity.constant;
     public ShootProjectiles.shootingFrequency sFreq = ShootProjectiles.shootingFrequency.constant;
     public ShootProjectiles.shootingType sType = ShootProjectiles.shootingType.semicircleSpread;
-    public bool shootsFireProjectile = false;
-
     public int projectileCount = 1;
     public float projectileSpeed = 1f;
     public float playerDetectRadius = 3.5f;
