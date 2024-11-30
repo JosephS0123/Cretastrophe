@@ -86,6 +86,9 @@ public class EnemyControllerAI : MonoBehaviour
     private bool prevLookingRight;
     private bool prevPrevLookingRight;
 
+    private float startJumpx;
+    private float endJumpx;
+
     /* debug flags 
         0 = no console logs    
         1 = print movetypes (the type of movement enemy should make, e.g. straight, reverse, jump...)
@@ -94,7 +97,7 @@ public class EnemyControllerAI : MonoBehaviour
         4 = LOS detection
         10 = everything
     */
-    public int debugCode = 1; 
+    public int debugCode = 2; 
     
     /* or should be an Awake() method? */
     void Start()
@@ -331,6 +334,14 @@ public class EnemyControllerAI : MonoBehaviour
                         movetype = MoveType.reverse;
                         stuckCounter = 0;
                     }
+                } else {
+                    stuckCounter = 0;
+                    if (IsGrounded() ) {
+                        CanJump();
+                        movetype = MoveType.startJump;
+                    } else {
+                        movetype = MoveType.reverse;
+                    }
                 }
             }
         } else {
@@ -354,12 +365,16 @@ public class EnemyControllerAI : MonoBehaviour
                 break;
             case MoveType.midJump:
                 // Have we reached the stop point? Either the middle of the jump.x or the supposed end.x
-                // if (lookDirection.x > 0 ? (transform.position.x >= stopJumpAtX) : (transform.position.x <= stopJumpAtX)) {
-                //     movetype = MoveType.freefall;
-                // } else {
-                //     MoveForward();
-                // }
-                MoveForward();
+                if (lookDirection.x > 0 ? (transform.position.x >= stopJumpAtX) : (transform.position.x <= stopJumpAtX)) {
+                    movetype = MoveType.freefall;
+                    endJumpx = transform.position.x;
+                } else {
+                    if (IsWallAhead()) {
+                        rb.velocity = new Vector2(0, rb.velocity.y);
+                    } else {
+                        MoveForward();
+                    }   
+                }
                 break;
             case MoveType.fallOff: // move forward til not grounded
                 MoveForward();
@@ -397,19 +412,23 @@ public class EnemyControllerAI : MonoBehaviour
                 return;
             }
         } else {
+            if (movetype == MoveType.midJump || movetype == MoveType.freefall) {
+                    endJumpx = transform.position.x;
+                if (startJumpx == endJumpx) {
+                    movetype = MoveType.reverse;
+                    endJumpx = 100f;
+                    startJumpx = 0f;
+                    return;
+                }
+            }
+
             if (IsWallAhead())
             {
                 if (IsIncliningSlope()){
                     movetype = MoveType.straight;
                 } else { /* check other paths since its an obstacle you cant walk over */
-                    if (CanJump()) {
-                        if (rollDice(.8f)) {
-                            movetype = MoveType.startJump;
-                            return;
-                        }
-                    }
-                    /* implied else */ 
-                    movetype = MoveType.reverse;
+                    CanJump();
+                    movetype = MoveType.startJump;
                 }
             }
             else if (gapAhead)
@@ -451,7 +470,7 @@ public class EnemyControllerAI : MonoBehaviour
         Vector2 topRayOrigin = currentPos + new Vector2(offsetAheadX, offsetTopY);
         Vector2 bottomRayOrigin = currentPos + new Vector2(offsetAheadX, offsetBottomY);
         Vector2 centerRayOrigin = currentPos + new Vector2(offsetAheadX, 0);
-        Vector2 verticalRayOrigin = currentPos + new Vector2(lookDirection.x * (enemyWidth / 2 * 1.2f), -enemyHeight/2); // Bottom edge of vertical ray
+        Vector2 verticalRayOrigin = currentPos + new Vector2(lookDirection.x * (enemyWidth/2 + .1f), -enemyHeight/2); // Bottom edge of vertical ray
 
         RaycastHit2D topHit = Physics2D.Raycast(topRayOrigin, lookDirection, horizRayLength, groundLayer);
         RaycastHit2D bottomHit = Physics2D.Raycast(bottomRayOrigin, lookDirection, horizRayLength, groundLayer);
@@ -461,20 +480,18 @@ public class EnemyControllerAI : MonoBehaviour
         // Draw the rays for debugging
         Color rayColor = Color.red; // Color for horizontal rays
 
-        if (debugCode == 2 || debugCode == 3) {
-            if (topHit) {
-                Debug.DrawRay(topRayOrigin, lookDirection * horizRayLength, rayColor);
-            }
-            if (centerHit) {
-                Debug.DrawRay(centerRayOrigin, lookDirection * horizRayLength, rayColor);
-            }
-            if (bottomHit) {
-                Debug.DrawRay(bottomRayOrigin, lookDirection * horizRayLength, rayColor);
-            }
-            if (verticalHit) {
-                Debug.DrawRay(verticalRayOrigin, Vector2.up * vertRayLength, rayColor); 
-                return true;
-            }
+        if (topHit) {
+            Debug.DrawRay(topRayOrigin, lookDirection * horizRayLength, rayColor);
+        }
+        if (centerHit) {
+            Debug.DrawRay(centerRayOrigin, lookDirection * horizRayLength, rayColor);
+        }
+        if (bottomHit) {
+            Debug.DrawRay(bottomRayOrigin, lookDirection * horizRayLength, rayColor);
+        }
+        if (verticalHit) {
+            Debug.DrawRay(verticalRayOrigin, Vector2.up * vertRayLength, rayColor); 
+            return true;
         }
 
         // Count how many raycasts hit something
@@ -844,6 +861,7 @@ public class EnemyControllerAI : MonoBehaviour
     // Preserve current x velocity and add upward force, y velocity naturally decreases due to big G
     void DoJump()
     {
+        startJumpx = transform.position.x;
         rb.velocity = new Vector2(rb.velocity.x, jumpForce);
     }
 
