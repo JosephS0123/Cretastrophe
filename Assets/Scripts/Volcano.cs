@@ -18,6 +18,7 @@ public class Volcano : MonoBehaviour
     public float riseTime;
     public float blastTime;
     private bool blasting;
+    public bool isActive;
     public float offset;
     public float blastSize;
     float cycleTime;
@@ -33,7 +34,7 @@ public class Volcano : MonoBehaviour
         lava.SetActive(true);
         blasting = false;
 
-        blast.GetComponent<SpriteRenderer>().size = new Vector2(0.62f, blastSize);
+        blast.GetComponent<SpriteRenderer>().size = new Vector2(0.62f, blastSize/transform.localScale.x);
         blast.transform.position = (blastSize/2) * transform.up + transform.position;
         spout.transform.position = (blastSize-.12f) * transform.up + transform.position;
     }
@@ -41,7 +42,7 @@ public class Volcano : MonoBehaviour
     
     void Update()
     {
-        if (!blasting)
+        if (!blasting && isActive)
         {
             percentRisen += Time.deltaTime * 1 / riseTime;
             float newValue = lavaPosMin + (lavaPosMax - lavaPosMin) * percentRisen;

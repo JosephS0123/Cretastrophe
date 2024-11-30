@@ -10,10 +10,10 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 13312, guid: 0000000000000000e000000000000000, type: 0}
-  m_Name: tile_item_yellow
+  m_Name: tileset_liquid_3
   m_EditorClassIdentifier: 
-  m_Sprite: {fileID: 21300000, guid: 76ce1b95d9a92a946bf17d7e1291f863, type: 3}
-  m_Color: {r: 1, g: 0.94073004, b: 0.2783019, a: 1}
+  m_Sprite: {fileID: -1498378808, guid: 1ddcd131f9c6bc04084178e9fac07214, type: 3}
+  m_Color: {r: 0.8666667, g: 0.25165734, b: 0.086274505, a: 1}
   m_Transform:
     e00: 1
     e01: 0
