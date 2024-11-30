@@ -86,11 +86,22 @@ MonoBehaviour:
   direction: 0
   projectileT: 2
   projectileA: 0
+  pElement: 0
+  igniterScript: {fileID: 0}
   pMobility: 1
   projectileLifetime: 15
   pullRadius: 3.5
   pullAccelerationTime: 3
   canShrinkPlayer: 0
+  playerLayer:
+    serializedVersion: 2
+    m_Bits: 256
+  groundLayer:
+    serializedVersion: 2
+    m_Bits: 0
+  chalkLayer:
+    serializedVersion: 2
+    m_Bits: 128
 --- !u!50 &3580858712291274920
 Rigidbody2D:
   serializedVersion: 4

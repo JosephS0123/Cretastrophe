@@ -47,7 +47,7 @@ CircleCollider2D:
   m_Material: {fileID: 0}
   m_IncludeLayers:
     serializedVersion: 2
-    m_Bits: 768
+    m_Bits: 896
   m_ExcludeLayers:
     serializedVersion: 2
     m_Bits: 3127
@@ -60,7 +60,7 @@ CircleCollider2D:
     m_Bits: 512
   m_ContactCaptureLayers:
     serializedVersion: 2
-    m_Bits: 768
+    m_Bits: 896
   m_CallbackLayers:
     serializedVersion: 2
     m_Bits: 4294967295
@@ -86,9 +86,22 @@ MonoBehaviour:
   direction: 0
   projectileT: 0
   projectileA: 1
-  lifeTime: 15
+  pElement: 0
+  igniterScript: {fileID: 0}
+  pMobility: 1
+  projectileLifetime: 15
   pullRadius: 5
-  maxPullStrength: 10
+  pullAccelerationTime: 10
+  canShrinkPlayer: 0
+  playerLayer:
+    serializedVersion: 2
+    m_Bits: 256
+  groundLayer:
+    serializedVersion: 2
+    m_Bits: 512
+  chalkLayer:
+    serializedVersion: 2
+    m_Bits: 128
 --- !u!50 &-8407482255729093560
 Rigidbody2D:
   serializedVersion: 4

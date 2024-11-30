@@ -11,14 +11,18 @@ public class Projectile : MonoBehaviour
         spike is a break-on-contact projectile affected by gravity
         bullet is projectile that moves along a specified direction, ignoring gravity until despawns/makes contact
     */
-    public enum projectileType {spike, bullet, blackhole, boomerang};
+    public enum projectileType { spike, bullet, blackhole, boomerang};
     /*
         make sure sticky doesnt destroy on impact
     */
-    public enum projectileAttribute {sticky, nonsticky, tracking, fire, ice};
-    public enum projectileMobility {immobile, mobile};
+    public enum projectileAttribute { sticky, nonsticky};
+    public enum projectileElement { normal, fire, ice };
+    public enum projectileMobility { immobile, mobile};
     public projectileType projectileT; // projectileType.spike  is default
-    public projectileAttribute projectileA = projectileAttribute.nonsticky;
+    public projectileAttribute projectileA = projectileAttribute.nonsticky; // What most normal projectiles are
+    public projectileElement pElement = projectileElement.normal;
+    public Igniter igniterScript;
+
     private float distanceTilDespawn = 20f;
     private Vector2 startPos;
 
@@ -46,10 +50,14 @@ public class Projectile : MonoBehaviour
     /* For shrinking player in blakc hoel*/
     private int tick = 5;
     public bool canShrinkPlayer = false;
+    public LayerMask playerLayer;
+    public LayerMask groundLayer;
+    public LayerMask chalkLayer;
 
     void Start()
     {
-        if (pMobility == projectileMobility.immobile) {
+        if (pMobility == projectileMobility.immobile) 
+        {
             rb = GetComponent<Rigidbody2D>();
 
             rb.velocity = Vector2.zero;
@@ -77,7 +85,9 @@ public class Projectile : MonoBehaviour
                 default:
                     break;
             }
-        } else {
+        } 
+        else 
+        {
             float angleInRadians = direction * Mathf.Deg2Rad;
             angleInRadians += (angleInRadians > 1.55f) ? -.2f : .2f;
             Vector2 directionVector = new Vector2(Mathf.Cos(angleInRadians), Mathf.Sin(angleInRadians));
@@ -114,6 +124,18 @@ public class Projectile : MonoBehaviour
                     break;
             }
         }
+
+        if (pElement == projectileElement.fire) {
+            // Igniter igniteComponent = gameObject.AddComponent<Igniter>();
+            gameObject.AddComponent<Igniter>(); // Dynamically add the Igniter component
+            Igniter iScript = gameObject.GetComponent<Igniter>();
+
+            if (iScript != null)
+            {
+                iScript.burnableLayer = 1 << LayerMask.NameToLayer("Obstacle");
+                iScript.fireSpreadRange = 0.5f;
+            }
+        } 
     }
 
     void FixedUpdate()
@@ -124,7 +146,7 @@ public class Projectile : MonoBehaviour
             Destroy(gameObject);
         }
 
-        if (runTimer && pMobility == projectileMobility.mobile) {
+        if (runTimer && (pMobility != projectileMobility.immobile)) {
             timer += Time.deltaTime;
             if (timer >= projectileLifetime) {
                 Destroy(gameObject);
@@ -219,48 +241,10 @@ public class Projectile : MonoBehaviour
     
     void killPlayer()
     {
-        Scene currentScene = SceneManager.GetActiveScene();
-        SceneManager.LoadScene(currentScene.name);
+        player = GameObject.Find("Player");
+        playerScript = player.GetComponent<Player>();
+        playerScript.Die();
     }
-    
-    /* remove this ?*/
-    // void OnCollisionEnter2D(Collision2D collision)
-    // {
-    //     // Check if the collision object is on the "Obstacle" or "Player" layers
-    //     if (collision.gameObject.layer == LayerMask.NameToLayer("Obstacle") ||
-    //         collision.gameObject.layer == LayerMask.NameToLayer("Player"))
-    //     {
-    //         // Destroy the projectile when it collides with something in "Obstacle" or "Player" layer
-    //         if (collision.gameObject.layer == LayerMask.NameToLayer("Player")) {
-    //             Debug.Log("Destroying projectile due to collision with player");
-    //             if (projectileT == projectileType.blackhole) {
-    //                 killingPlayer = true;
-    //                 /* TODO: KILL PLAYER */
-    //                 // if (!killingPlayer) {
-    //                 //     killPlayer();
-    //                 //     Destroy(gameObject);
-
-    //                 // }
-    //             } else {
-    //                 Destroy(gameObject);
-    //             }
-    //         } else { /* Hit an obstacle */
-    //             if (projectileT == projectileType.boomerang) {
-    //                 if (isReturning) {
-    //                     /* boomerang becomes destructible if its returning otherwise indestructable */
-    //                     Destroy(gameObject);
-    //                 }
-    //                 /* return */
-    //             } else if (projectileT == projectileType.blackhole) {
-    //                 rb.velocity = Vector2.zero;
-    //             } else {
-    //                 Destroy(gameObject);
-    //             }
-    //         }
-    //     }
-    // }
-
-
 
 
     void OnTriggerEnter2D(Collider2D other)
@@ -270,15 +254,11 @@ public class Projectile : MonoBehaviour
             other.gameObject.layer == LayerMask.NameToLayer("Player") ||
             other.gameObject.layer == LayerMask.NameToLayer("Chalk"))
         {
+            /* when projectile hits player*/
             if (other.gameObject.layer == LayerMask.NameToLayer("Player"))
             {
                 if (projectileT == projectileType.blackhole) {
-                    /* TODO: KILL PLAYER */
                     killingPlayer = true;
-                    // if (!killingPlayer) {
-                    //     killPlayer();
-                    //     Destroy(gameObject);
-                    // }
                 } else {
                     killPlayer();
                     Destroy(gameObject);
@@ -290,10 +270,7 @@ public class Projectile : MonoBehaviour
                     if (!runTimer) {
                         doRunTimer();
                     }
-
-                    if (timer >= projectileLifetime) {
-                        Destroy(gameObject);
-                    }
+                    
                     rb.velocity = Vector3.zero;
                     rb.gravityScale = 0;
                     return;
@@ -340,7 +317,7 @@ public class Projectile : MonoBehaviour
         switch (projectileA) 
         {
             case projectileAttribute.sticky:
-                projectileLifetime = 4f;
+                projectileLifetime = 3.5f;
                 break;
             default:
                 break;

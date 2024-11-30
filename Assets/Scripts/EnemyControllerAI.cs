@@ -33,10 +33,12 @@ public class EnemyControllerAI : MonoBehaviour
     public ViewType enemyViewType = ViewType.constant;
     public Projectile.projectileType projectileType = Projectile.projectileType.spike; /*TODO: assign to init func*/
     public Projectile.projectileAttribute pAttribute = Projectile.projectileAttribute.nonsticky;
+    public Projectile.projectileElement pElement = Projectile.projectileElement.normal;
     private ShootProjectiles projectiles;
     public ShootProjectiles.shootingDensity sDensity= ShootProjectiles.shootingDensity.constant;
     public ShootProjectiles.shootingFrequency sFreq = ShootProjectiles.shootingFrequency.constant;
     public ShootProjectiles.shootingType sType = ShootProjectiles.shootingType.semicircleSpread;
+    public bool shootsFireProjectile = false;
 
     public int projectileCount = 1;
     public float projectileSpeed = 1f;
@@ -113,8 +115,8 @@ public class EnemyControllerAI : MonoBehaviour
 
         clearOldPositions();
         player = GameObject.Find("Player");
-        playerLayer = LayerMask.GetMask("Player");
-        chalkLayer = LayerMask.GetMask("Chalk");
+        // playerLayer = 1 << LayerMask.GetMask("Player");
+        // chalkLayer = 1 << LayerMask.GetMask("Chalk");
         playerBoxCollider = player.GetComponent<BoxCollider2D>();
         playerWidth = playerBoxCollider.size.x;
         playerHeight = playerBoxCollider.size.y;
@@ -163,12 +165,12 @@ public class EnemyControllerAI : MonoBehaviour
         }
 
 
-        projectiles.setProjectileEnums(sFreq, sType, projectileType, sDensity, pAttribute);
+        projectiles.setProjectileEnums(sFreq, sType, projectileType, sDensity, pAttribute, pElement);
         projectiles.setProjectileBehavior(enemyFireRate, projectileCount, projectileSpeed, prefabName);
 
         switch (searchType) {
             case PlayerSearchType.colliderSphere:
-                InstantiateCircleCollider(playerDetectRadius, Vector2.zero, true);
+                // InstantiateCircleCollider(playerDetectRadius, Vector2.zero, true);
                 break;
             case PlayerSearchType.lineOfSight:
                 /* Do nothing */
@@ -279,6 +281,7 @@ public class EnemyControllerAI : MonoBehaviour
         {
             // Maybe delete the circlecollider2D in favor for IsWithinRadius() since same thing && more concise (later if i care)
             case PlayerSearchType.colliderSphere:
+                detectsPlayerInRadius();
                 break;
             case PlayerSearchType.lineOfSight:
                 GetPlayerPosition();
@@ -773,43 +776,72 @@ public class EnemyControllerAI : MonoBehaviour
         }
     }
 
+    void detectsPlayerInRadius()
+    {
+        GetPlayerPosition();
+        float distance = Vector2.Distance(playerPosition, (Vector2)transform.position);
+        bool playerIsInRadius = distance <= playerDetectRadius; 
+
+        if (distance <= enemyCollider.bounds.size.x / 2.2f) {
+            killPlayer();
+        }
+
+        if (playerIsInRadius && IsGrounded()) {
+            statetype = defaultStateCombatType;
+            movetype = MoveType.freefall;
+            DoFall();
+        } else {
+            statetype = defaultStateMobileType;
+        }
+    }
+
     // Detect when something contacts with either enemy hitbox or aggroCollider
     // currently does nothing
     /* TODO: access a class to kill off player */
-    private void OnTriggerEnter2D(Collider2D other)
+    private void OnTriggerEnter2D(Collider2D other) 
     {
         // Check if the player entered the aggro range
         if (((1 << other.gameObject.layer) & playerLayer) != 0)
         {
-            if (playerDetectionCollider != null && other.IsTouching(playerDetectionCollider) && IsGrounded()) {
-                /* Set default aggro behavior*/
-                Debug.Log("Player entered aggro range!");
-                statetype = defaultStateCombatType;
-                movetype = MoveType.freefall;
-                DoFall();
-            } else if (playerDetectionCollider != null && other.IsTouching(playerDetectionCollider)) {
-                /* TODO: insert player kill logic here*/
-                Debug.Log("Player SHOULD DIE HERE!");
-            }
+            // if (playerDetectionCollider != null && other.IsTouching(playerDetectionCollider) && IsGrounded()) {
+            //     /* Set default aggro behavior*/
+            //     Debug.Log("Player entered aggro range!");
+            //     statetype = defaultStateCombatType;
+            //     movetype = MoveType.freefall;
+            //     DoFall();
+            // } else if (playerDetectionCollider != null && other.IsTouching(playerDetectionCollider)) {
+            //     /* TODO: insert player kill logic here*/
+            //     Player pScript = player.GetComponent<Player>();
+            //     pScript.Die();
+            //     Debug.Log("Player SHOULD DIE HERE!");
+            // }
+            Player pScript = player.GetComponent<Player>();
+            pScript.Die();
         } 
+    }
+
+    private void killPlayer()
+    {
+        Player pScript = player.GetComponent<Player>();
+        pScript.Die();
     }
 
     // detect when the player exits the aggro range
     // Exit attack mode here and return to normal conditions
     /* No real use atm*/
-    private void OnTriggerExit2D(Collider2D other)
-    {
-        if (((1 << other.gameObject.layer) & playerLayer) != 0)
-        {
-            if (playerDetectionCollider != null && !other.IsTouching(playerDetectionCollider) && IsGrounded()) {
-                /* Set default move behavior*/
-                Debug.Log("Player left aggro range!");
-                statetype = defaultStateMobileType;
-                movetype = MoveType.freefall;
-                DoFall();
-            }
-        } 
-    }
+    // private void OnTriggerExit2D(Collider2D other)
+    // {
+    //     if (((1 << other.gameObject.layer) & playerLayer) != 0)
+    //     {
+    //         if (playerDetectionCollider != null && !other.IsTouching(playerDetectionCollider) && IsGrounded()) {
+    //             /* Set default move behavior*/
+    //             Debug.Log("Player left aggro range!");
+    //             statetype = defaultStateMobileType;
+    //             movetype = MoveType.freefall;
+    //             DoFall();
+    //         }
+    //     } 
+    // }
 
     // Preserve current x velocity and add upward force, y velocity naturally decreases due to big G
     void DoJump()

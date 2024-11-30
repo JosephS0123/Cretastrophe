@@ -9,7 +9,7 @@ public class ShootProjectiles : MonoBehaviour
     public enum shootingFrequency { accelerate, windup, constant, decelerate};
     public enum shootingType { single, widespread, narrowSpread, semicircleSpread };
     public enum shootingDensity {constant, decreasing, increasing}
-
+    Projectile.projectileElement pElement;
     private shootingFrequency sFreq;
     private shootingType sType;
     private shootingDensity sDensity;
@@ -30,6 +30,7 @@ public class ShootProjectiles : MonoBehaviour
     private float fireRateDelta = 1f; // how much to increase/decrease shoot speed per shot
     public float maxFireRate = .4f; // cant shoot faster than 1 shot every .4 sec 
     public float minFireRate = 5f;
+    private bool isFireProjectile;
 
     // the max spread for a volley of projectiles (in degrees)
     private float getVolleyAngle()
@@ -86,6 +87,7 @@ public class ShootProjectiles : MonoBehaviour
             projScript.projectileA = projectileAttribute;
             projScript.projectileT = projectileType;
             projScript.speed = (projectileSpeed < minSingleShotfireRate) ? minSingleShotfireRate : projectileSpeed;
+            projScript.pElement = pElement;
         
         } else if (!randomSpread) {
             assignLaunchAngles();
@@ -99,6 +101,7 @@ public class ShootProjectiles : MonoBehaviour
                 projScript.projectileA = projectileAttribute;
                 projScript.speed = projectileSpeed;
                 projScript.projectileT = projectileType;
+                projScript.pElement = pElement;
 
                 /* Ensure symmetry and correct launch angles of projectiles */
                 if (enemyLookDir.x > 0) {
@@ -157,13 +160,14 @@ public class ShootProjectiles : MonoBehaviour
     }
 
     // initialize before behavior (1)
-    public void setProjectileEnums(shootingFrequency shootFreq, shootingType shootType, Projectile.projectileType projectileType, shootingDensity sDensity = shootingDensity.constant, Projectile.projectileAttribute pAttribute=Projectile.projectileAttribute.nonsticky)
+    public void setProjectileEnums(shootingFrequency shootFreq, shootingType shootType, Projectile.projectileType projectileType, shootingDensity sDensity = shootingDensity.constant, Projectile.projectileAttribute pAttribute=Projectile.projectileAttribute.nonsticky, Projectile.projectileElement pElement = Projectile.projectileElement.normal)
     {
         sFreq = shootFreq;
         sType = shootType;
         this.projectileType = projectileType;
         this.sDensity = sDensity;
         this.projectileAttribute = pAttribute;
+        this.pElement = pElement;
     }
 
     // initialize after enums (2)
