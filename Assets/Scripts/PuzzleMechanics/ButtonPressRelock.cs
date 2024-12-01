@@ -11,30 +11,62 @@ public class ButtonPressRelock : MonoBehaviour
     public Sprite unpressedSprite;
     public int doorIndex;
     private SpriteRenderer _renderer;
+
+    List<GameObject> collidingList;
+
+    private int numInTrigger = 0;
     void Start()
     {
         _renderer = gameObject.GetComponent<SpriteRenderer>();
+        collidingList = new List<GameObject>();
     }
 
     void Update()
     {
-        
+        GameObject[] collidingArray = collidingList.ToArray();
+        foreach (GameObject colliding in collidingArray)
+        {
+            if (colliding == null)
+            {
+                if (collidingList.Remove(colliding.gameObject)) { numInTrigger--; }
+            }
+        }
+
+        if (collidingList.Count == 0)
+        {
+            door.DoorUpdate(doorIndex - 1, false);
+            _renderer.sprite = unpressedSprite;
+        }
     }
 
     private void OnTriggerEnter2D(Collider2D collision)
     {
-        if (collision.CompareTag("Player") || collision.CompareTag("PhysicsObj")|| collision.gameObject.GetComponent<ChalkEater>() != null)
+        if (collision.gameObject.transform.CompareTag("Player") || collision.gameObject.transform.CompareTag("PhysicsObj")|| collision.gameObject.GetComponent<ChalkEater>() != null)
         {
-            door.DoorUpdate(doorIndex-1, true);
-            //AudioSource.PlayClipAtPoint(drawSound, transform.position);
-            _renderer.sprite = pressedSprite;
+            collidingList.Add(collision.gameObject);
+
+            if (collidingList.Count == 1)
+            {
+                door.DoorUpdate(doorIndex - 1, true);
+                //AudioSource.PlayClipAtPoint(drawSound, transform.position);
+                _renderer.sprite = pressedSprite;
+            }
+            numInTrigger++;
         }
     }
 
     private void OnTriggerExit2D(Collider2D collision)
     {
-        door.DoorUpdate(doorIndex-1, false);
-        _renderer.sprite = unpressedSprite;
+        if (collision.gameObject.transform.CompareTag("Player") || collision.gameObject.transform.CompareTag("PhysicsObj") || collision.gameObject.GetComponent<ChalkEater>() != null)
+        {
+            if (collidingList.Remove(collision.gameObject)) { numInTrigger--; }
+
+            if (collidingList.Count == 0)
+            {
+                door.DoorUpdate(doorIndex - 1, false);
+                _renderer.sprite = unpressedSprite;
+            }
+        }
     }
 }
 

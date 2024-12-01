@@ -17,6 +17,7 @@ public class Line : MonoBehaviour
     public bool touchedLava = false;
     public float heatLevel = 0;
     public bool inLava = false;
+    public bool bluePrevCheck = true;
 
     private readonly List<Vector2> _points = new List<Vector2>();
     void Start()
@@ -37,7 +38,11 @@ public class Line : MonoBehaviour
         Vector2 pos = Vector2.zero;
         pos.x = _pos.x - transform.position.x;
         pos.y = _pos.y - transform.position.y;
-        if (!CanAppend(pos)) return false;
+
+        if (!CanAppend(pos))
+        {
+            return false;
+        }
 
         
         _points.Add(pos);
@@ -96,8 +101,7 @@ public class Line : MonoBehaviour
         {
             return true;
         }
-
-        return Vector2.Distance(_renderer.GetPosition(_renderer.positionCount - 1), pos) > DrawManager.RESOLUTION;
+        return Vector2.Distance(_renderer.GetPosition(_renderer.positionCount - 1), pos) - DrawManager.RESOLUTION > float.Epsilon;
     }
 
     public bool CanAppendWorldSpace(Vector2 _pos)
@@ -111,7 +115,7 @@ public class Line : MonoBehaviour
         pos.x = _pos.x - transform.position.x;
         pos.y = _pos.y - transform.position.y;
 
-        return Vector2.Distance(_renderer.GetPosition(_renderer.positionCount - 1), pos) > DrawManager.RESOLUTION;
+        return Vector2.Distance(_renderer.GetPosition(_renderer.positionCount - 1), pos) - DrawManager.RESOLUTION > float.Epsilon;
     }
 
     public void destroy()
