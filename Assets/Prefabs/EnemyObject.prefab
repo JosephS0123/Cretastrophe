@@ -155,7 +155,7 @@ BoxCollider2D:
   m_GameObject: {fileID: 8587186825617489101}
   m_Enabled: 1
   m_Density: 1
-  m_Material: {fileID: 0}
+  m_Material: {fileID: 6200000, guid: fd9f440412c935a5e8a805258c8aed6d, type: 2}
   m_IncludeLayers:
     serializedVersion: 2
     m_Bits: 4294967295
@@ -213,7 +213,6 @@ MonoBehaviour:
   sDensity: 0
   sFreq: 0
   sType: 3
-  shootsFireProjectile: 0
   projectileCount: 5
   projectileSpeed: 4
   playerDetectRadius: 3.5
@@ -232,6 +231,6 @@ MonoBehaviour:
     serializedVersion: 2
     m_Bits: 128
   moveSpeed: 2.5
-  jumpForce: 7
+  jumpForce: 8
   hopForce: 1
   debugCode: 0

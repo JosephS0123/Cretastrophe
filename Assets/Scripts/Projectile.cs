@@ -15,14 +15,13 @@ public class Projectile : MonoBehaviour
     /*
         make sure sticky doesnt destroy on impact
     */
-    public enum projectileAttribute { sticky, nonsticky};
+    public enum projectileAttribute { sticky, nonsticky, combustible};
     public enum projectileElement { normal, fire, ice };
     public enum projectileMobility { immobile, mobile};
     public projectileType projectileT; // projectileType.spike  is default
     public projectileAttribute projectileA = projectileAttribute.nonsticky; // What most normal projectiles are
     public projectileElement pElement = projectileElement.normal;
-    public Igniter igniterScript;
-
+    public Igniter iScript;
     private float distanceTilDespawn = 20f;
     private Vector2 startPos;
 
@@ -54,8 +53,17 @@ public class Projectile : MonoBehaviour
     public LayerMask groundLayer;
     public LayerMask chalkLayer;
 
+    /* changin sprites */
+    private SpriteRenderer spriteRenderer;
+    public Sprite defaultSprite;
+    public Sprite onFireSprite;
+
     void Start()
     {
+        Transform projectileTransform = transform.Find("projectile");
+        spriteRenderer = projectileTransform.GetComponent<SpriteRenderer>();
+        spriteRenderer.sprite = defaultSprite;
+
         if (pMobility == projectileMobility.immobile) 
         {
             rb = GetComponent<Rigidbody2D>();
@@ -64,23 +72,14 @@ public class Projectile : MonoBehaviour
             rb.gravityScale = 0;
             startPos = (Vector2)transform.position;
 
-
             switch (projectileT)
             {
                 case projectileType.blackhole:
                     pullRadius = 5f;
 
                     player = GameObject.Find("Player");
-                    if (player == null) {
-                        Debug.Log("PLAYER NOT FOUND IN PROJECTILE.CS \nDestroying projectile object!");
-                        Debug.Log("PLAYER NOT FOUND IN PROJECTILE.CS \nDestroying projectile object!");
-                        Debug.Log("PLAYER NOT FOUND IN PROJECTILE.CS \nDestroying projectile object!");
-                        Debug.Log("PLAYER NOT FOUND IN PROJECTILE.CS \nDestroying projectile object!");
-                        Debug.Log("PLAYER NOT FOUND IN PROJECTILE.CS \nDestroying projectile object!");
-                    } else {
-                        playerController = player.GetComponent<Controller2D>();
-                        playerScript = player.GetComponent<Player>();
-                    }
+                    playerController = player.GetComponent<Controller2D>();
+                    playerScript = player.GetComponent<Player>();
                     break;
                 default:
                     break;
@@ -109,16 +108,10 @@ public class Projectile : MonoBehaviour
                     pullRadius = 5f;
 
                     player = GameObject.Find("Player");
-                    if (player == null) {
-                        Debug.Log("PLAYER NOT FOUND IN PROJECTILE.CS \nDestroying projectile object!");
-                        Debug.Log("PLAYER NOT FOUND IN PROJECTILE.CS \nDestroying projectile object!");
-                        Debug.Log("PLAYER NOT FOUND IN PROJECTILE.CS \nDestroying projectile object!");
-                        Debug.Log("PLAYER NOT FOUND IN PROJECTILE.CS \nDestroying projectile object!");
-                        Debug.Log("PLAYER NOT FOUND IN PROJECTILE.CS \nDestroying projectile object!");
-                    } else {
-                        playerController = player.GetComponent<Controller2D>();
-                        playerScript = player.GetComponent<Player>();
-                    }
+                    
+                    playerController = player.GetComponent<Controller2D>();
+                    playerScript = player.GetComponent<Player>();
+                    
                     break;
                 default:
                     break;
@@ -126,16 +119,23 @@ public class Projectile : MonoBehaviour
         }
 
         if (pElement == projectileElement.fire) {
-            // Igniter igniteComponent = gameObject.AddComponent<Igniter>();
-            gameObject.AddComponent<Igniter>(); // Dynamically add the Igniter component
-            Igniter iScript = gameObject.GetComponent<Igniter>();
-
-            if (iScript != null)
-            {
-                iScript.burnableLayer = 1 << LayerMask.NameToLayer("Obstacle");
-                iScript.fireSpreadRange = 0.5f;
-            }
+            IgniteProjectile();
         } 
+    }
+
+    void IgniteProjectile()
+    {
+        gameObject.AddComponent<Igniter>(); // Dynamically add the Igniter component
+        iScript = gameObject.GetComponent<Igniter>();
+
+        if (iScript != null)
+        {
+            iScript.burnableLayer = 1 << LayerMask.NameToLayer("Obstacle");
+            iScript.fireSpreadRange = 0.5f;
+
+            spriteRenderer.sprite = onFireSprite;
+
+        }
     }
 
     void FixedUpdate()
@@ -249,6 +249,7 @@ public class Projectile : MonoBehaviour
 
     void OnTriggerEnter2D(Collider2D other)
     {
+        bool destroyObject = true;
         // Check if the other collider is on the "Obstacle" or "Player" layers
         if (other.gameObject.layer == LayerMask.NameToLayer("Obstacle") ||
             other.gameObject.layer == LayerMask.NameToLayer("Player") ||
@@ -274,6 +275,11 @@ public class Projectile : MonoBehaviour
                     rb.velocity = Vector3.zero;
                     rb.gravityScale = 0;
                     return;
+                } else if (projectileA == projectileAttribute.combustible) {
+                    if (other.gameObject.CompareTag("Red")) { /* when hitting red chalk */
+                        IgniteProjectile();
+                        destroyObject = false;
+                    }
                 }
 
                 if (projectileT == projectileType.boomerang) {
@@ -285,7 +291,9 @@ public class Projectile : MonoBehaviour
                 } else if (projectileT == projectileType.blackhole) {
                     rb.velocity = Vector2.zero;
                 } else {
-                    Destroy(gameObject);
+                    if (destroyObject){
+                        Destroy(gameObject);
+                    }
                 }
             }
         }

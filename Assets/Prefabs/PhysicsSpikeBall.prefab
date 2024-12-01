@@ -135,7 +135,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5a7304ccbefa342418a3b0b00177bc0c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  player: {fileID: 0}
   respawnPoint: {fileID: 0}
 --- !u!50 &6459843115992508514
 Rigidbody2D:

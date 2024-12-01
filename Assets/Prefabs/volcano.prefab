@@ -11,7 +11,7 @@ GameObject:
   - component: {fileID: 8627785375782485650}
   - component: {fileID: 3378217554578435849}
   m_Layer: 0
-  m_Name: volcano
+  m_Name: Volcano
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -54,6 +54,7 @@ MonoBehaviour:
   spout: {fileID: 2912223750495907191}
   riseTime: 3
   blastTime: 2
+  isActive: 1
   offset: 0
   blastSize: 0
 --- !u!1 &2912223750495907191
