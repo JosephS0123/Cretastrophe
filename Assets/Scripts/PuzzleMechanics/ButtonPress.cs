@@ -23,7 +23,7 @@ public class ButtonPress : MonoBehaviour
 
     private void OnTriggerEnter2D(Collider2D collision)
     {
-        if (collision.CompareTag("Player") || collision.CompareTag("PhysicsObj") || collision.CompareTag("BlueLine"))
+        if (collision.CompareTag("Player") || collision.CompareTag("PhysicsObj") || collision.CompareTag("BlueLine") || collision.gameObject.GetComponent<ChalkEater>() != null)
         {
             door.DoorUpdate(doorIndex-1, true);
             //AudioSource.PlayClipAtPoint(drawSound, transform.position);
@@ -37,3 +37,4 @@ public class ButtonPress : MonoBehaviour
         _renderer.sprite = unpressedSprite;
     }
 }
+
