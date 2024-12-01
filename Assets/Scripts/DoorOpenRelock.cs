@@ -1,45 +1,66 @@
-using System;
-using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
 public class DoorOpenRelock : MonoBehaviour
 {
-    public int buttonCount;
-    private bool[] buttons;
+    private HashSet<int> activeButtons = new HashSet<int>();
+    private SpriteRenderer[] tileRenderers;
+    private Collider2D doorCollider;
 
-    void Start()
+    public Color activeColor = new Color(0.5f, 0.7f, 1f, 0.5f); 
+    public Color inactiveColor = new Color(0.5f, 0.7f, 1f, 1f);
+
+    private void Start()
     {
-        buttons = new bool[buttonCount];
-        Array.Fill(buttons, false);
+        // Get all SpriteRenderers in this door's hierarchy
+        tileRenderers = GetComponentsInChildren<SpriteRenderer>();
+        doorCollider = GetComponent<Collider2D>();
+
+        // Initialize all tiles to the inactive color
+        SetTileColors(inactiveColor);
     }
 
-    // Update is called once per frame
-    void Update()
+    public void ButtonPressed(int buttonIndex)
     {
-        
+        activeButtons.Add(buttonIndex);
+        UpdateDoorState();
     }
 
-    public void DoorUpdate(int index, bool value)
+    public void ButtonReleased(int buttonIndex)
     {
-        buttons[index] = value;
-        bool allPressed = true;
-        for (int i = 0; i < buttonCount; i++)
+        activeButtons.Remove(buttonIndex);
+        UpdateDoorState();
+    }
+
+    private void UpdateDoorState()
+    {
+        if (activeButtons.Count > 0)
         {
-            if (!buttons[i]) 
+            // Door is "active" (open)
+            SetTileColors(activeColor);
+            if (doorCollider != null)
             {
-                allPressed = false;
-                break; 
+                doorCollider.enabled = false; // Disable collision
             }
-        }
-
-        if (allPressed)
-        {
-            gameObject.SetActive(false);
         }
         else
         {
-            gameObject.SetActive(true);
+            // Door is "inactive" (closed)
+            SetTileColors(inactiveColor);
+            if (doorCollider != null)
+            {
+                doorCollider.enabled = true; // Enable collision
+            }
+        }
+    }
+
+    private void SetTileColors(Color color)
+    {
+        if (tileRenderers == null || tileRenderers.Length == 0) return;
+
+        foreach (var renderer in tileRenderers)
+        {
+            renderer.color = color;
         }
     }
 }
