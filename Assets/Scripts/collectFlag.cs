@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 public class collectFlag : MonoBehaviour
 {
@@ -25,12 +26,23 @@ public class collectFlag : MonoBehaviour
         
     }
 
+    public void UnlockNewLevel()
+    {
+        if(SceneManager.GetActiveScene().buildIndex >= PlayerPrefs.GetInt("ReachedIndex"))
+        {
+            PlayerPrefs.SetInt("ReachedIndex", SceneManager.GetActiveScene().buildIndex + 1 );
+            PlayerPrefs.SetInt("UnlockedLevel", PlayerPrefs.GetInt("UnlockedLevel", 1) + 1);
+            PlayerPrefs.Save();
+        }
+    }   
+
 
     // This function is called when another collider enters the trigger collider attached to this GameObject
     private void OnTriggerEnter2D(Collider2D collision)
     {
          if (collision.CompareTag("Player"))
          {
+            UnlockNewLevel();
             AudioSource.PlayClipAtPoint(drawSound, transform.position);
 
             // Destroy the item after it's collision triggered
