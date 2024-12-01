@@ -6,6 +6,9 @@ public class DoorOpenRelock : MonoBehaviour
     private HashSet<int> activeButtons = new HashSet<int>();
     private SpriteRenderer[] tileRenderers;
     private Collider2D doorCollider;
+    public int buttonCount;
+    private bool[] buttons;
+    public GameObject antiStuck;
 
     public Color activeColor = new Color(0.5f, 0.7f, 1f, 0.5f); 
     public Color inactiveColor = new Color(0.5f, 0.7f, 1f, 1f);
@@ -61,6 +64,22 @@ public class DoorOpenRelock : MonoBehaviour
         foreach (var renderer in tileRenderers)
         {
             renderer.color = color;
+        }
+    }
+
+    private void OnTriggerStay2D(Collider2D collision)
+    {
+        if(collision.CompareTag("Player"))
+        {
+            antiStuck.SetActive(false);
+        }
+    }
+
+    private void OnTriggerExit2D(Collider2D collision)
+    {
+        if (collision.CompareTag("Player"))
+        {
+            antiStuck.SetActive(true);
         }
     }
 }
