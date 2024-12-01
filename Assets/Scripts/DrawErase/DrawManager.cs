@@ -24,6 +24,8 @@ public class DrawManager : MonoBehaviour
     private GameObject screenClearInstance;
 
     public const float RESOLUTION = .1f;
+    public const float RESOLUTION_ICE = .5f;
+    public float _resolution = RESOLUTION;
     public const float amountChalkUsed = .1f;
 
     public GameObject dynamicLineParent;
@@ -85,7 +87,7 @@ public class DrawManager : MonoBehaviour
         {
             if(_currentLine != null)
             {
-                if(isDynamic)
+                if(isDynamic && _currentDynamicParent.GetComponent<Rigidbody2D>() != null)
                 {
                     _currentDynamicParent.GetComponent<Rigidbody2D>().bodyType = RigidbodyType2D.Dynamic;
                 }
@@ -137,6 +139,7 @@ public class DrawManager : MonoBehaviour
             _linePrefab = _blueLinePrefab;
             _chalkManager = _blueChalkManager;
             isDynamic = true;
+            _resolution = RESOLUTION_ICE;
             if (_currentLine != null && Input.GetMouseButton(0))
             {
                 _currentLine.destroy();
@@ -202,7 +205,7 @@ public class DrawManager : MonoBehaviour
 
     private void drawDynamicLine(Vector2 mousePos, bool canDraw)
     {
-        Vector2 nextPos = Vector2.MoveTowards(prevMousePos, mousePos, RESOLUTION);
+        Vector2 nextPos = Vector2.MoveTowards(prevMousePos, mousePos, _resolution);
 
         if (_currentLine == null && !_chalkManager.isEmpty() && canDraw)
         {
@@ -211,6 +214,7 @@ public class DrawManager : MonoBehaviour
             _currentLine._chalkManager = _chalkManager;
             _currentLine.SetPosition(mousePos);
         }
+
 
         while (_currentLine != null && _currentLine.CanAppendWorldSpace(mousePos) && _chalkManager.chalkAmount > 0)
         {
@@ -224,7 +228,7 @@ public class DrawManager : MonoBehaviour
 
             if (!canDraw)
             {
-                nextPos = Vector2.MoveTowards(nextPos, mousePos, RESOLUTION);
+                nextPos = Vector2.MoveTowards(nextPos, mousePos, _resolution);
                 _currentLine.destroy();
                 _currentDynamicParent.GetComponent<Rigidbody2D>().bodyType = RigidbodyType2D.Dynamic;
 
@@ -236,15 +240,16 @@ public class DrawManager : MonoBehaviour
             else if (_currentLine.SetPosition(nextPos))
             {
                 _chalkManager.ReduceChalk(amountChalkUsed);
+                _currentLine.bluePrevCheck = false;
 
                 _currentLine = Instantiate(_linePrefab, nextPos, Quaternion.identity, _currentDynamicParent.transform);
                 _currentLine._chalkManager = _chalkManager;
                 _currentLine.SetPosition(nextPos);
-                nextPos = Vector2.MoveTowards(nextPos, mousePos, RESOLUTION);
+                nextPos = Vector2.MoveTowards(nextPos, mousePos, _resolution);
             }
             else
             {
-                nextPos = Vector2.MoveTowards(nextPos, mousePos, RESOLUTION);
+                nextPos = Vector2.MoveTowards(nextPos, mousePos, _resolution);
             }
 
         }
@@ -264,6 +269,13 @@ public class DrawManager : MonoBehaviour
                 if (hit2D.collider.tag == "NoDraw" || hit2D.collider.tag == "Eraser" || hit2D.collider.tag == "Ground")
                 {
                     return false;
+                }
+                if (isDynamic && hit2D.collider.tag == "BlueLine")
+                {
+                    if (!hit2D.collider.gameObject.GetComponent<Line>().bluePrevCheck)
+                    {
+                        return false;
+                    }
                 }
             }
 
@@ -341,6 +353,7 @@ public class DrawManager : MonoBehaviour
             _linePrefab = _blueLinePrefab;
             _chalkManager = _blueChalkManager;
             isDynamic = true;
+            _resolution = RESOLUTION_ICE;
         }
     }
 
