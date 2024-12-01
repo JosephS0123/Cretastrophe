@@ -13,6 +13,7 @@ TagManager:
   - BlueLine
   - Ground
   - Lava
+  - FxTemporaire
   layers:
   - Default
   - TransparentFX
@@ -67,6 +68,9 @@ TagManager:
     locked: 0
   - name: Ground
     uniqueID: 1024043353
+    locked: 0
+  - name: Effects
+    uniqueID: 2477529771
     locked: 0
   - name: Eraser
     uniqueID: 532178899

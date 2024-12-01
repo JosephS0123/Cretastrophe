@@ -331,8 +331,8 @@ TilemapRenderer:
   m_AutoUVMaxDistance: 0.5
   m_AutoUVMaxAngle: 89
   m_LightmapParameters: {fileID: 0}
-  m_SortingLayerID: 0
-  m_SortingLayer: 0
+  m_SortingLayerID: 1024043353
+  m_SortingLayer: 5
   m_SortingOrder: 0
   m_ChunkSize: {x: 32, y: 32, z: 32}
   m_ChunkCullingBounds: {x: 0, y: 0, z: 0}
@@ -354,7 +354,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5a7304ccbefa342418a3b0b00177bc0c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  player: {fileID: 0}
   respawnPoint: {fileID: 0}
 --- !u!19719996 &1684622119886846007
 TilemapCollider2D:

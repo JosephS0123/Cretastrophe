@@ -129,7 +129,7 @@ public class Line : MonoBehaviour
     private void OnTriggerEnter2D(Collider2D collision)
     {
         // Destroy the item after its collision triggered
-        if (collision.gameObject.tag == "Eraser" && !isErased)
+        if ((collision.gameObject.tag == "Eraser" || collision.gameObject.tag == "BallDespawn") && !isErased)
         {
             if(gameObject.tag == "BlueLine")
             {

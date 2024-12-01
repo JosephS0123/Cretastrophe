@@ -176,3 +176,5 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   spikeBallSpawner: {fileID: 0}
+  canBeErased: 0
+  effect: {fileID: 141433446842962269, guid: 9fe8f8b3288e45a44af36ff8aa04486e, type: 3}
