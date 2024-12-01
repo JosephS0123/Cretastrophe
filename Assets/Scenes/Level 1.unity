@@ -3284,7 +3284,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5a7304ccbefa342418a3b0b00177bc0c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  player: {fileID: 0}
   respawnPoint: {fileID: 0}
 --- !u!483693784 &987937013
 TilemapRenderer:
@@ -5267,6 +5266,7 @@ MonoBehaviour:
   lookSmoothTimeX: 0.5
   verticalSmoothTime: 0.2
   focusAreaSize: {x: 2, y: 3}
+  lookAheadForwardOnly: 0
 --- !u!1 &1470824481
 GameObject:
   m_ObjectHideFlags: 0
@@ -6163,6 +6163,10 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 3556523729749320688, guid: 2152a6c29caab7a448f695a1150b2715, type: 3}
       propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5245923949833796670, guid: 2152a6c29caab7a448f695a1150b2715, type: 3}
+      propertyPath: m_Navigation.m_Mode
       value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 5597330308585899674, guid: 2152a6c29caab7a448f695a1150b2715, type: 3}
