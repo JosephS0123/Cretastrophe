@@ -7,6 +7,7 @@ public class DoorOpenRelockInverse : MonoBehaviour
 
     public Color activeColor = new Color(0.5f, 0.7f, 1f, 1f); // Fully opaque light blue when closed
     public Color inactiveColor = new Color(0.5f, 0.7f, 1f, 0.2f); // Semi-transparent light blue when open
+    public GameObject antiStuck;
 
     private bool isActive = false; // Door starts as open (inactive)
 
@@ -29,7 +30,8 @@ public class DoorOpenRelockInverse : MonoBehaviour
             SetTileColors(activeColor); // Full visibility (opaque)
             if (doorCollider != null)
             {
-                doorCollider.enabled = true; // Enable collision (door is closed)
+                //doorCollider.enabled = true; // Enable collision (door is closed)
+                antiStuck.SetActive(true);
             }
         }
         else
@@ -38,7 +40,8 @@ public class DoorOpenRelockInverse : MonoBehaviour
             SetTileColors(inactiveColor); // Semi-transparent (open)
             if (doorCollider != null)
             {
-                doorCollider.enabled = false; // Disable collision (door is open)
+                //doorCollider.enabled = false; // Disable collision (door is open)
+                antiStuck.SetActive(false);
             }
         }
     }
@@ -50,6 +53,22 @@ public class DoorOpenRelockInverse : MonoBehaviour
         foreach (var renderer in tileRenderers)
         {
             renderer.color = color; // Set the transparency here
+        }
+    }
+
+    private void OnTriggerStay2D(Collider2D collision)
+    {
+        if (collision.CompareTag("Player"))
+        {
+            antiStuck.SetActive(false);
+        }
+    }
+
+    private void OnTriggerExit2D(Collider2D collision)
+    {
+        if (collision.CompareTag("Player"))
+        {
+            antiStuck.SetActive(true);
         }
     }
 }

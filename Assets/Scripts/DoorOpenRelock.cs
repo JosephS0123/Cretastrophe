@@ -44,6 +44,8 @@ public class DoorOpenRelock : MonoBehaviour
             if (doorCollider != null)
             {
                 doorCollider.enabled = false; // Disable collision
+                antiStuck.SetActive(false);
+
             }
         }
         else
@@ -53,6 +55,7 @@ public class DoorOpenRelock : MonoBehaviour
             if (doorCollider != null)
             {
                 doorCollider.enabled = true; // Enable collision
+                antiStuck.SetActive(true);
             }
         }
     }
