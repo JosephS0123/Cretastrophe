@@ -87,7 +87,7 @@ public class EnemyControllerAI : MonoBehaviour
     private bool prevPrevLookingRight;
 
     private float startJumpx;
-    private float endJumpx;
+private float endJumpx;
 
     /* debug flags 
         0 = no console logs    
@@ -121,6 +121,8 @@ public class EnemyControllerAI : MonoBehaviour
         playerBoxCollider = player.GetComponent<BoxCollider2D>();
         playerWidth = playerBoxCollider.size.x;
         playerHeight = playerBoxCollider.size.y;
+
+
 
         aggroFrameTimeRemaining = aggroFrameTime;
         actualLookDirectionAngle = (lookDirection.x > 0) ? lookDirectionAngle : 180f - lookDirectionAngle;
@@ -369,7 +371,7 @@ public class EnemyControllerAI : MonoBehaviour
                 // Have we reached the stop point? Either the middle of the jump.x or the supposed end.x
                 if (lookDirection.x > 0 ? (transform.position.x >= stopJumpAtX) : (transform.position.x <= stopJumpAtX)) {
                     movetype = MoveType.freefall;
-                    endJumpx = transform.position.x;
+                endJumpx = transform.position.x;
                 } else {
                     if (IsWallAhead()) {
                         rb.velocity = new Vector2(0, rb.velocity.y);
@@ -415,7 +417,7 @@ public class EnemyControllerAI : MonoBehaviour
             }
         } else {
             if (movetype == MoveType.midJump || movetype == MoveType.freefall) {
-                    endJumpx = transform.position.x;
+                endJumpx = transform.position.x;
                 if (startJumpx == endJumpx) {
                     movetype = MoveType.reverse;
                     endJumpx = 100f;
@@ -604,8 +606,8 @@ public class EnemyControllerAI : MonoBehaviour
     void SetLookDirection() 
     {
         // Check the rotation of the enemy to set the look direction
-        lookDirection = transform.rotation.y > 0f ? Vector2.right : Vector2.left;
-        isFacingRight = transform.rotation.y > 0f; /* used to be "< 180f" ; default look direction should be left*/
+        isFacingRight = transform.rotation.y != 0f; /* used to be "< 180f" ; default look direction should be left*/
+        lookDirection = isFacingRight ? Vector2.right : Vector2.left;
     }
 
     /* Uses some dynamic raycasting to predict valid jump spots, if none then fail to jump */
