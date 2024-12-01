@@ -182,6 +182,8 @@ public class EnemyControllerAI : MonoBehaviour
                 /* do nothing */
                 break;
         }
+        groundLayer = chalkLayer | groundLayer; // combine both layers as they both serve practical purposes
+
     }
 
     // "Resets" position trackers due to transitions from certain enemy states 
