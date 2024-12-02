@@ -25,6 +25,7 @@ public class NewChalk : MonoBehaviour
             {
                 drawManagerObj.SetActive(true); //Enables drawing
                 drawManager.canDrawBlue = true; //Enables drawing
+                drawManager.hasBlue = true; //chalk ui test
             }
 
             if (chalkBar != null)

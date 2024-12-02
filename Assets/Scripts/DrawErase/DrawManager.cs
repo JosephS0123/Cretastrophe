@@ -37,6 +37,11 @@ public class DrawManager : MonoBehaviour
     public bool canDrawWhite;
     public bool canDrawRed;
     public bool canDrawBlue;
+
+    //Chalk UI 
+    public bool hasWhite = false;
+    public bool hasRed = false;
+    public bool hasBlue = false;
     void Start()
     {
         _cam = Camera.main;

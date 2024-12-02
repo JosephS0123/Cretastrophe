@@ -1,24 +1,45 @@
 using UnityEngine;
+using System.Collections;
 
 public class collect_key : MonoBehaviour
 {
+    public AudioClip drawSound; 
+    public GameObject animation;
+    private SpriteRenderer spriteRenderer; 
+    private Collider2D collider2D; 
 
-     public AudioClip drawSound; //Sound effect
+    void Start()
+    {
+        
+        spriteRenderer = GetComponent<SpriteRenderer>();
+        collider2D = GetComponent<Collider2D>();
+    }
 
-    // This function is called when another collider enters the trigger collider attached to this GameObject
     private void OnTriggerEnter2D(Collider2D collision)
     {
-         if (collision.CompareTag("Player"))
-         {
+        if (collision.CompareTag("Player"))
+        {
             
             AudioSource.PlayClipAtPoint(drawSound, transform.position);
 
-            // Destroy the item after it's collision triggered
-            Destroy(gameObject);
+           
+            spriteRenderer.enabled = false;
+            collider2D.enabled = false;
 
-            //Add to key counter
+            
+            animation.SetActive(true);
+
+            
             GameManager.addKey();
 
+            
+            StartCoroutine(DestroyAfterDelay(1.5f)); 
         }
+    }
+
+    private IEnumerator DestroyAfterDelay(float delay)
+    {
+        yield return new WaitForSeconds(delay); 
+        Destroy(gameObject); 
     }
 }
