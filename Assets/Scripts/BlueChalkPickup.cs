@@ -8,6 +8,7 @@ public class NewChalk : MonoBehaviour
      public DrawManager drawManager; //DrawManager ref
      public GameObject drawManagerObj; //DrawManager ref
      public GameObject chalkBar;
+     public chalkSelector_NEW chalkSelect; //ChalkSelector Script ref
 
     // This function is called when another collider enters the trigger collider attached to this GameObject
     private void OnTriggerEnter2D(Collider2D collision)

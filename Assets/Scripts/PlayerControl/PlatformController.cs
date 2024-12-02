@@ -44,7 +44,7 @@ public class PlatformController : RayCastController
 
         var guo = new GraphUpdateObject(collider.bounds);
         guo.updatePhysics = true;
-        AstarPath.active.UpdateGraphs(guo);
+        if (AstarPath.active != null) { AstarPath.active.UpdateGraphs(guo); }
     }
 
     Vector3 CalculatePlatformMovement()

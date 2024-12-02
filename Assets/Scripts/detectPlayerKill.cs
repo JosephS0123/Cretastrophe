@@ -5,10 +5,13 @@ using UnityEngine.SceneManagement;
 
 public class detectPlayerKill : MonoBehaviour
 {
+
+    private Player playerScript;
+
     // Start is called before the first frame update
     void Start()
     {
-        
+        playerScript = FindObjectOfType<Player>();
     }
 
     // Update is called once per frame
@@ -22,7 +25,8 @@ public class detectPlayerKill : MonoBehaviour
 
         if(other.gameObject.CompareTag("Player"))
         {
-            SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
+            playerScript.Die();
+            //SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
         }
     }
 }
