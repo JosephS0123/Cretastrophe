@@ -95,7 +95,7 @@ public class Projectile : MonoBehaviour
         else 
         {
             float angleInRadians = direction * Mathf.Deg2Rad;
-            angleInRadians += (angleInRadians > 1.55f) ? -.2f : .2f;
+            // angleInRadians += (angleInRadians > 1.55f) ? -.2f : .2f;
             Vector2 directionVector = new Vector2(Mathf.Cos(angleInRadians), Mathf.Sin(angleInRadians));
             rb = GetComponent<Rigidbody2D>();
             
@@ -118,6 +118,9 @@ public class Projectile : MonoBehaviour
                     playerController = player.GetComponent<Controller2D>();
                     playerScript = player.GetComponent<Player>();
                     
+                    break;
+                case projectileType.bullet:
+                    rb.gravityScale = 0;
                     break;
                 default:
                     break;

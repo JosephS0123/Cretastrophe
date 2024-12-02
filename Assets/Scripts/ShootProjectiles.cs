@@ -77,6 +77,7 @@ public class ShootProjectiles : MonoBehaviour
             Vector2 direction = playerPos - (Vector2)transform.position;
             float angleInRadians = Mathf.Atan2(direction.y, direction.x);
             directions[0] = angleInRadians * Mathf.Rad2Deg;
+            print("degress = " + directions[0]);
 
             /* for now spawn projectile inside enemy */
             // Vector2 spawnPosition = enemyPosition + new Vector2 (enemyLookDir.x * .1f, 0);  

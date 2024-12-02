@@ -27,7 +27,7 @@ public class EnemyControllerAI : MonoBehaviour
     
     /* Enemy Behavior */
     public MoveType movetype;
-    private StateType statetype;
+    public StateType statetype;
     public StateType defaultStateMobileType = StateType.mobile;
     public StateType defaultStateCombatType = StateType.combatStill;
     public PlayerSearchType searchType;
@@ -89,7 +89,8 @@ public class EnemyControllerAI : MonoBehaviour
 
     private float startJumpx;
     private float jumpStrength;
-private float endJumpx;
+    private float endJumpx;
+    public bool isTurret;
 
     /* debug flags 
         0 = no console logs    
@@ -239,9 +240,9 @@ private float endJumpx;
     void checkState()
     {
         // Check possible movestates first in order to prevent a weird race-like conditions
-        TryMove();
+        TryMove(); // fails to run if its not a mobile enemy
         // Updates statetype based on the manner of which the enemy aggroes onto player (if it does)
-        playerSearch();
+        playerSearch(); // updates enemy aggro
 
         switch (statetype){
             case StateType.combatMove:
@@ -262,7 +263,7 @@ private float endJumpx;
                 updatePassiveMove();
                 break;
             case StateType.immobile:
-                /*todo maybe*/
+                /* dont move */
                 break;
             default:
                 break;
@@ -274,9 +275,9 @@ private float endJumpx;
     void playerSearch()
     {
         // Ensure not taking over a "Critical" moment of movement which may cause unwanted enemy behavior
-        if (movetype == MoveType.midJump || movetype == MoveType.freefall || movetype == MoveType.startJump || movetype == MoveType.fallOff) {
+        if ((defaultStateMobileType == StateType.mobile || defaultStateCombatType == StateType.combatMove) && (movetype == MoveType.midJump || movetype == MoveType.freefall || movetype == MoveType.startJump || movetype == MoveType.fallOff)) {
             aggroFrameTimeRemaining--;
-            statetype = StateType.mobile;
+            statetype = defaultStateMobileType;
             return;
         }
 
@@ -405,6 +406,10 @@ private float endJumpx;
     {
         /* walls and gaps cant happen at the same place, wall takes priority
             then slopes, then gaps */
+        if (!(statetype == StateType.mobile || statetype == StateType.combatMove)){
+            return;
+        }
+
         bool onGround = IsGrounded();
 
         /* sudden contact with ground mid jump cancels forward motion*/
@@ -832,7 +837,8 @@ private float endJumpx;
             killPlayer();
         }
 
-        if (playerIsInRadius && IsGrounded()) {
+        /* TODO can be an issue if wrong state */
+        if (playerIsInRadius && ((defaultStateMobileType == StateType.immobile && defaultStateCombatType == StateType.combatStill) || (defaultStateCombatType == StateType.combatStill && IsGrounded()))) {
             statetype = defaultStateCombatType;
             movetype = MoveType.freefall;
             DoFall();
@@ -901,7 +907,9 @@ private float endJumpx;
     void updateCombatStill()
     {
         GetPlayerPosition();
-        rb.velocity = Vector3.zero; // ensure no movement while still
+        if (!isTurret) {
+            rb.velocity = Vector3.zero; // ensure no movement while still
+        }
 
         /* update enemy look direction when trying to shoot */
         if (playerPosition.x - transform.position.x > 0 && !isFacingRight){
@@ -911,7 +919,7 @@ private float endJumpx;
         }
 
         clearOldPositions();
-        projectiles.FireProjectiles((Vector2)transform.position, vec2r(), (Vector2)playerPosition);
+        projectiles.FireProjectiles((Vector2)transform.position + new Vector2(vec2rx() * enemyWidth/2, enemyHeight/4), vec2r(), (Vector2)playerPosition);
     }
 
     // nuff sed
@@ -919,7 +927,11 @@ private float endJumpx;
     {
         if (player != null)
         {
-            playerPosition = player.transform.position;
+            if (isTurret) {
+                playerPosition = new Vector2 (transform.position.x + vec2rx() * 10f, transform.position.y);
+            } else {
+                playerPosition = player.transform.position;
+            }
         }
         else
         {
@@ -1067,7 +1079,7 @@ private float endJumpx;
     public void Respawn()
     {
         transform.position = spawnPos;
-        Start();
+        // Start();
     }
 
 }
