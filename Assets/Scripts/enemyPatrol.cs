@@ -1,10 +1,10 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.SceneManagement;
+//using UnityEngine.SceneManagement;
 
 
-public class EnemyTest : MonoBehaviour
+public class enemyPatrol : MonoBehaviour
 {
     public float rayDistGround;
     public float rayDistFront;
@@ -13,11 +13,13 @@ public class EnemyTest : MonoBehaviour
     public Transform Detector; //This will detect if there is ground in front of the enemy or not.
     public Collider2D enemyCollider;  // Reference to the enemy's collider
     public Collider2D playerDetect; //Ref to killPlayer collider
+    private Player playerScript;
 
     void Start()
     {
         enemyCollider = GetComponent<Collider2D>();
         playerDetect = GetComponent<Collider2D>();
+        playerScript = FindObjectOfType<Player>();
     }
 
     // Update is called once per frame
@@ -52,7 +54,10 @@ public class EnemyTest : MonoBehaviour
             if (frontCheck.collider && frontCheck.collider.CompareTag("Player"))
             {
             // KILL muahaha
-                SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
+                 Debug.Log("Death here.");
+                playerScript.Die();
+
+                //SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
             }
 
             if (moveRight)
@@ -70,10 +75,11 @@ public class EnemyTest : MonoBehaviour
 
     private void OnTriggerEnter2D(Collider2D other)
     {
-        Debug.Log("work pls");
         if(other.gameObject.CompareTag("Player"))
         {
-            SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
+            Debug.Log("Glitch here.");
+            playerScript.Die();
+            //SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
         }
     }
 
