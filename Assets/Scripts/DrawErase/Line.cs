@@ -275,7 +275,7 @@ public class Line : MonoBehaviour
             {
                 DrawManager _drawManager = _chalkManager.gameObject.GetComponent<DrawManager>();
                 Transform _parent = gameObject.transform.parent;
-                if (_parent.gameObject.GetComponent<Rigidbody2D>().bodyType == RigidbodyType2D.Dynamic)
+                if (_parent != null && _parent.gameObject.GetComponent<Rigidbody2D>().bodyType == RigidbodyType2D.Dynamic)
                 {
                     List<Transform> children = new List<Transform>();
                     bool allInLava = true;
@@ -313,7 +313,12 @@ public class Line : MonoBehaviour
         }
         else
         {
-            Rigidbody2D _rb = gameObject.transform.parent.GetComponent<Rigidbody2D>();
+            Rigidbody2D _rb = null;
+            if (gameObject.CompareTag("BlueLine") && gameObject.transform.parent != null)
+            {
+                _rb = gameObject.transform.parent.GetComponent<Rigidbody2D>();
+            }
+            
             if(gameObject.CompareTag("BlueLine") && _rb != null && (_rb.bodyType == RigidbodyType2D.Dynamic))
             {
                 heatLevel += Time.deltaTime * 1.5f;

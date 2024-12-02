@@ -77,6 +77,14 @@ public class Player : MonoBehaviour
         }
         
         Vector2 input = new Vector2(Input.GetAxisRaw("Horizontal"), Input.GetAxisRaw("Vertical"));
+        if(input.x < 0)
+        {
+            spriteRenderer.flipX = true;
+        }
+        else if(input.x > 0)
+        {
+            spriteRenderer.flipX = false;
+        }
 
         
         if(controller.collisions.below && !coyoteCheckPost && !jumping)
