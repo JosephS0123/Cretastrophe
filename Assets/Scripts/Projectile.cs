@@ -3,6 +3,7 @@ using UnityEngine.SceneManagement;
 
 public class Projectile : MonoBehaviour
 {
+    Vector3 spawnPos;
     public float speed = 5f;      
     public float direction;
 
@@ -60,6 +61,7 @@ public class Projectile : MonoBehaviour
 
     void Start()
     {
+        spawnPos = transform.position;
         Transform projectileTransform = transform.Find("projectile");
         spriteRenderer = projectileTransform.GetComponent<SpriteRenderer>();
         spriteRenderer.sprite = defaultSprite;
@@ -337,6 +339,12 @@ public class Projectile : MonoBehaviour
 
         // Shrink the object by multiplying its scale by the shrink factor
         player.transform.localScale = currentScale * shrinkFactor;
+    }
+
+    public void Respawn()
+    {
+        transform.position = spawnPos;
+        Start();
     }
 
 }

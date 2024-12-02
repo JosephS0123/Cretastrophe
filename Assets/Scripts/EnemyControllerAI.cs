@@ -12,6 +12,7 @@ using UnityEngine;
 public class EnemyControllerAI : MonoBehaviour
 {
     /* enemy state management */
+    Vector3 spawnPos;
     public enum MoveType   {   straight, freefall, reverse, idle, startJump, midJump, fallOff };
     private float stopJumpAtX;
     /*  combatMove is chase and run
@@ -98,12 +99,14 @@ private float endJumpx;
         4 = LOS detection
         10 = everything
     */
-    public int debugCode = 1; 
+    public int debugCode = 0; 
     
     /* or should be an Awake() method? */
     void Start()
     {
-        /* Don't want enemy to move if falling down, will begin to move upon contact w/ ground
+        spawnPos = transform.position;
+        /* Don't want enemy
+         to move if falling down, will begin to move upon contact w/ ground
             Enemy also starts of not in aggro
         */
         movetype = MoveType.freefall;
@@ -117,19 +120,14 @@ private float endJumpx;
 
         clearOldPositions();
         player = GameObject.Find("Player");
-        // playerLayer = 1 << LayerMask.GetMask("Player");
-        // chalkLayer = 1 << LayerMask.GetMask("Chalk");
         playerBoxCollider = player.GetComponent<BoxCollider2D>();
         playerWidth = playerBoxCollider.size.x;
         playerHeight = playerBoxCollider.size.y;
-
-
 
         aggroFrameTimeRemaining = aggroFrameTime;
         actualLookDirectionAngle = isFacingRight ? lookDirectionAngle : 180f - lookDirectionAngle;
 
         projectiles = gameObject.AddComponent<ShootProjectiles>();
-        // projectiles.setProjectileCount(projectileCount, "Projectile", projectileSpeed);
 
         switch (projectileType)
         {
@@ -232,9 +230,9 @@ private float endJumpx;
     public void FixedUpdate()
     {
         checkState();
-        if (debugCode == 1) {
-            printMovetype();
-        }
+        // if (debugCode == 1) {
+        //     printMovetype();
+        // }
     }
 
 
@@ -543,12 +541,12 @@ private float endJumpx;
         // Draw the rays for debugging
         Color rayColor = Color.green; // Color for horizontal rays
         // if (verticalHitUpSlope) {
-            Debug.DrawRay(verticalRayOrigin, Vector2.down * vertRayLengthDown, rayColor); // Debug for vertical ray
+            // Debug.DrawRay(verticalRayOrigin, Vector2.down * vertRayLengthDown, rayColor); // Debug for vertical ray
             // return true;
         // }
 
-        print("slope ahead?");
-        print(verticalHitUpSlope.collider == null);
+        // print("slope ahead?");
+        // print(verticalHitUpSlope.collider == null);
         return verticalHitUpSlope.collider == null;
     }
 
@@ -577,8 +575,8 @@ private float endJumpx;
         Debug.DrawRay(frontRayOrigin, Vector2.down * vertRayLength, Color.red);
 
         // No safe ground was in contact if null therefore unsafe
-        print("is unsafe gap?");
-        print(frontHit.collider == null);
+        // print("is unsafe gap?");
+        // print(frontHit.collider == null);
         return frontHit.collider == null;
     }
 
@@ -1021,7 +1019,7 @@ private float endJumpx;
             }
             else if (((1 << hit.collider.gameObject.layer) & playerLayer) != 0)
             {
-                Debug.Log("Player in LOS: " + hit.collider.gameObject.name);
+                // Debug.Log("Player in LOS: " + hit.collider.gameObject.name);
                 // Debug.DrawLine(enemyPos, hit.point, Color.blue, 1f);
                 return true; 
             }
@@ -1065,4 +1063,11 @@ private float endJumpx;
         playerDetectionCollider.isTrigger = isTrigger;
         playerDetectionCollider.offset = offset;
     }
+
+    public void Respawn()
+    {
+        transform.position = spawnPos;
+        Start();
+    }
+
 }
