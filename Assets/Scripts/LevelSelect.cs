@@ -9,6 +9,7 @@ public class LevelSelect : MonoBehaviour
 
     public Button[] buttons;
 
+/*
     public void Awake()
     {
         int unlockedLevel = PlayerPrefs.GetInt("UnlockedLevel", 1);
@@ -21,7 +22,7 @@ public class LevelSelect : MonoBehaviour
         {
             buttons[i].interactable = true;
         }
-    }
+    } */
 
     public void OpenLevel(int levelId)
     {
