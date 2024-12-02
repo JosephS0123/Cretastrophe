@@ -29,16 +29,20 @@ public class chalkSelector_NEW : MonoBehaviour
             chalkUIs[i].sizeDelta = Vector2.Lerp(chalkUIs[i].sizeDelta, targetSize, Time.deltaTime * scaleSpeed);
         }
 
+        //Base index: 0
+        //Fire index: 1
+        //Ice index: 2
+
         // Handle keyboard shortcuts
         if (Input.GetKeyDown(KeyCode.Alpha1) && drawManager.hasWhite)
         {
             SetSelectedChalkIndex(0); // Base chalk
         }
-        else if (Input.GetKeyDown(KeyCode.Alpha2) && drawManager.hasRed)
+        else if (Input.GetKeyDown(KeyCode.Alpha3) && drawManager.hasRed)
         {
             SetSelectedChalkIndex(1); // Fire chalk
         }
-        else if (Input.GetKeyDown(KeyCode.Alpha3) && drawManager.hasBlue)
+        else if (Input.GetKeyDown(KeyCode.Alpha2) && drawManager.hasBlue)
         {
             SetSelectedChalkIndex(2); // Ice chalk
         }

@@ -122,7 +122,8 @@ public class DrawManager : MonoBehaviour
             }
             isDynamic = false;
         }
-        else if(Input.GetKeyDown("2") && canDrawRed)
+        //Fire chalk
+        else if(Input.GetKeyDown("3") && canDrawRed)
         {
             _linePrefab = _redLinePrefab;
             _chalkManager = _redChalkManager;
@@ -139,7 +140,8 @@ public class DrawManager : MonoBehaviour
             }
             isDynamic = false;
         }
-        else if (Input.GetKeyDown("3") && canDrawBlue)
+        //Ice chalk
+        else if (Input.GetKeyDown("2") && canDrawBlue)
         {
             _linePrefab = _blueLinePrefab;
             _chalkManager = _blueChalkManager;
