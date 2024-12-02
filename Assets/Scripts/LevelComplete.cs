@@ -1,19 +1,18 @@
 using UnityEngine;
-using UnityEngine.UI; // Make sure to import UnityEngine.UI for the Legacy Text component
+using TMPro; 
 
 public class LevelComplete : MonoBehaviour
 {
-    public Text gemsCollectedText;  
-    private int totalGems = 3;    
+    public TextMeshProUGUI gemsCollectedText; 
+    private int totalGems = 3; // Total gems for the level
 
-    // This function will be called when the level is completed
+    
     public void ShowLevelCompleteScreen()
     {
-       
-        int collectedGems = GameManager.diamondCount;
-        //int totalGems = GameManager.maxDiamondCount; This doesn't work lol but will fix after demo
+        int collectedGems = GameManager.diamondCount; 
+        //int totalGems = GameManager.maxDiamondCount; // Uncomment if fixed later
 
-        
-        gemsCollectedText.text = "Gems Collected: " + collectedGems + "/" + totalGems;
+        // Update the TextMeshPro component with the collected gems text
+        gemsCollectedText.text = $"Gems Collected: {collectedGems}/{totalGems}";
     }
 }
