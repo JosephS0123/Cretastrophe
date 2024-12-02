@@ -10835,6 +10835,34 @@ PrefabInstance:
       propertyPath: respawnSound
       value: 
       objectReference: {fileID: 8300000, guid: 1b37697952c98314b964e0106f04b717, type: 3}
+    - target: {fileID: 6706413381317790905, guid: 37b27f4a2cfb5e240bfa1f09b5d49cfe, type: 3}
+      propertyPath: respawnObjects.m_PersistentCalls.m_Calls.Array.size
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 6706413381317790905, guid: 37b27f4a2cfb5e240bfa1f09b5d49cfe, type: 3}
+      propertyPath: respawnObjects.m_PersistentCalls.m_Calls.Array.data[0].m_Mode
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 6706413381317790905, guid: 37b27f4a2cfb5e240bfa1f09b5d49cfe, type: 3}
+      propertyPath: respawnObjects.m_PersistentCalls.m_Calls.Array.data[0].m_Target
+      value: 
+      objectReference: {fileID: 1340376737}
+    - target: {fileID: 6706413381317790905, guid: 37b27f4a2cfb5e240bfa1f09b5d49cfe, type: 3}
+      propertyPath: respawnObjects.m_PersistentCalls.m_Calls.Array.data[0].m_CallState
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 6706413381317790905, guid: 37b27f4a2cfb5e240bfa1f09b5d49cfe, type: 3}
+      propertyPath: respawnObjects.m_PersistentCalls.m_Calls.Array.data[0].m_MethodName
+      value: chalkClear
+      objectReference: {fileID: 0}
+    - target: {fileID: 6706413381317790905, guid: 37b27f4a2cfb5e240bfa1f09b5d49cfe, type: 3}
+      propertyPath: respawnObjects.m_PersistentCalls.m_Calls.Array.data[0].m_TargetAssemblyTypeName
+      value: DrawManager, Assembly-CSharp
+      objectReference: {fileID: 0}
+    - target: {fileID: 6706413381317790905, guid: 37b27f4a2cfb5e240bfa1f09b5d49cfe, type: 3}
+      propertyPath: respawnObjects.m_PersistentCalls.m_Calls.Array.data[0].m_Arguments.m_ObjectArgumentAssemblyTypeName
+      value: UnityEngine.Object, UnityEngine
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
