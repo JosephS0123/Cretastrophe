@@ -38,9 +38,9 @@ public class Projectile : MonoBehaviour
     public float maxPullStrength = 3f;
     private Controller2D playerController;
     public float pullAccelerationTime = 10f;
-    private float pullTimer = 5f;
+    private float pullTimer;
     private bool killingPlayer = false;
-    private int timeTilDeath = 60;
+    private int timeTilDeath;
 
     /* for boomerang behavior */
     private float timeTilReturn;
@@ -61,6 +61,13 @@ public class Projectile : MonoBehaviour
 
     void Start()
     {
+        timer = 0;
+        pullTimer = 5f;
+        killingPlayer = false;
+        runTimer = false;
+        timeTilDeath = 60;
+        tick = 5;
+
         spawnPos = transform.position;
         Transform projectileTransform = transform.Find("projectile");
         spriteRenderer = projectileTransform.GetComponent<SpriteRenderer>();
@@ -345,6 +352,8 @@ public class Projectile : MonoBehaviour
     {
         transform.position = spawnPos;
         Start();
+        
+
     }
 
 }
