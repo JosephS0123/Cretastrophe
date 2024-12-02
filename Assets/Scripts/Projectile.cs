@@ -270,7 +270,6 @@ public class Projectile : MonoBehaviour
                     killingPlayer = true;
                 } else {
                     killPlayer();
-                    Destroy(gameObject);
                 }
             }
             else
