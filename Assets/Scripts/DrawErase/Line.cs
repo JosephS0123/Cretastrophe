@@ -82,7 +82,7 @@ public class Line : MonoBehaviour
 
             var guo = new GraphUpdateObject(_collider.bounds);
             guo.updatePhysics = true;
-            AstarPath.active.UpdateGraphs(guo);
+            if(AstarPath.active != null) { AstarPath.active.UpdateGraphs(guo); }
 
             return true;
 

@@ -27,7 +27,7 @@ public class EraseController : MonoBehaviour
         }
         var guo = new GraphUpdateObject(GetComponent<Collider2D>().bounds);
         guo.updatePhysics = true;
-        AstarPath.active.UpdateGraphs(guo);
+        if (AstarPath.active != null) { AstarPath.active.UpdateGraphs(guo); }
     }
 
 }
