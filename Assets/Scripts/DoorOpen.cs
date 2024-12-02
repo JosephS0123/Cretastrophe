@@ -38,4 +38,10 @@ public class DoorOpen : MonoBehaviour
             gameObject.SetActive(false);
         }
     }
+
+    public void Respawn()
+    {
+        Array.Fill(buttons, false);
+        gameObject.SetActive(true);
+    }
 }

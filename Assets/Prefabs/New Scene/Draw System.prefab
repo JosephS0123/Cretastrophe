@@ -504,7 +504,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: -758, y: 9}
+  m_AnchoredPosition: {x: -758, y: 240}
   m_SizeDelta: {x: 250, y: 50}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!1 &5840903765580813741
@@ -638,7 +638,14 @@ MonoBehaviour:
   _blueChalkManager: {fileID: 2624819497026235142}
   eraser: {fileID: 9036070968856672644, guid: 00acba2eab2562b42af6067e2d5c6ae4, type: 3}
   screenClear: {fileID: 9036070968856672644, guid: 00888eedf600d5f49a9ad88130d6c1bf, type: 3}
+  _resolution: 0.1
   dynamicLineParent: {fileID: 7643107714073169479, guid: ac86c5ec01f7a104495f4e65defc9179, type: 3}
+  canDrawWhite: 0
+  canDrawRed: 0
+  canDrawBlue: 0
+  hasWhite: 0
+  hasRed: 0
+  hasBlue: 0
 --- !u!114 &2726747345458472457
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -722,7 +729,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: -756, y: 216}
+  m_AnchoredPosition: {x: -756, y: 350}
   m_SizeDelta: {x: 250, y: 50}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!1 &7497227628561982376
@@ -760,7 +767,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: -756, y: 107.8}
+  m_AnchoredPosition: {x: -756, y: 130}
   m_SizeDelta: {x: 250, y: 50}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!1 &7755050073794387676
