@@ -2,10 +2,13 @@ using System.Collections;
 using System.Collections.Generic;
 using Unity.VisualScripting;
 using UnityEngine;
+using UnityEngine.Events;
 
 [RequireComponent(typeof(Controller2D))]
 public class Player : MonoBehaviour
 {
+    public UnityEvent respawnObjects;
+    
     public float gravity = -25;
     float maxVelocityY = 15;
     float fallMultiplier = 1.15f;
@@ -234,6 +237,7 @@ public class Player : MonoBehaviour
         playerCollider.enabled = true;
         spriteRenderer.enabled = true;
         isDead = false;
+        respawnObjects.Invoke();
         
     }
 

@@ -4,7 +4,7 @@ using UnityEngine;
 
 public class ButtonSpecial : MonoBehaviour
 {
-    public DoorOpen door;
+    public DoorOpenRelock door;
     public Volcano volcano;
     //public AudioClip drawSound; //Sound effect
     public Sprite pressedSprite;
@@ -25,8 +25,9 @@ public class ButtonSpecial : MonoBehaviour
     {
         if (collision.CompareTag("Player") || collision.CompareTag("PhysicsObj") || collision.CompareTag("BlueLine"))
         {
-            door.DoorUpdate(doorIndex - 1, true);
-            volcano.isActive = true;
+            door.ButtonPressed(doorIndex - 1);
+
+            if (!volcano.isActive) { volcano.activate(true); }
             //AudioSource.PlayClipAtPoint(drawSound, transform.position);
             _renderer.sprite = pressedSprite;
         }
@@ -34,7 +35,13 @@ public class ButtonSpecial : MonoBehaviour
 
     private void OnTriggerExit2D(Collider2D collision)
     {
-        door.DoorUpdate(doorIndex - 1, false);
+        
         _renderer.sprite = unpressedSprite;
+    }
+
+    public void respawn()
+    {
+        door.ButtonReleased(doorIndex - 1);
+        volcano.activate(false);
     }
 }

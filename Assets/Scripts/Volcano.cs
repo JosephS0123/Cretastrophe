@@ -45,7 +45,7 @@ public class Volcano : MonoBehaviour
         if (!blasting && isActive)
         {
             percentRisen += Time.deltaTime * 1 / riseTime;
-            float newValue = lavaPosMin + (lavaPosMax - lavaPosMin) * percentRisen;
+            float newValue = lavaPosMin + (lavaPosMax - lavaPosMin) * Mathf.Clamp(percentRisen, 0, 1);
 
             Vector3 newPos = newValue * transform.up + transform.position;
 
@@ -66,7 +66,7 @@ public class Volcano : MonoBehaviour
         blasting = true;
         blast.SetActive(true);
         spout.SetActive(true);
-        lava.SetActive(false);
+        //lava.SetActive(false);
         StartCoroutine(blastWait(blastTime));
     }
 
@@ -91,5 +91,22 @@ public class Volcano : MonoBehaviour
         Gizmos.DrawLine(globalWaypointPos - Vector3.left * size, globalWaypointPos + Vector3.left * size);
         
         
+    }
+
+    public void activate(bool active)
+    {
+        if(isActive)
+        {
+            percentRisen = 0;
+            float newValue = lavaPosMin + (lavaPosMax - lavaPosMin) * Mathf.Clamp(percentRisen, 0, 1);
+
+            Vector3 newPos = newValue * transform.up + transform.position;
+
+            lavaTransform.Translate((newPos - lavaTransform.position), Space.World);
+            blast.SetActive(false);
+            spout.SetActive(false);
+        }
+        
+        isActive = active;
     }
 }
