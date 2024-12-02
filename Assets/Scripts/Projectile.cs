@@ -33,11 +33,11 @@ public class Projectile : MonoBehaviour
     private float timer = 0;
     /* blackhole */
     public float projectileLifetime = 15f; // time in seconds before blackhole despawns
-    public float pullRadius = 3.5f; // distance that player must be within to be affected by gravity
-    private float maxPullStrength = 3f;
+    public float pullRadius = 3f; // distance that player must be within to be affected by gravity
+    public float maxPullStrength = 3f;
     private Controller2D playerController;
     public float pullAccelerationTime = 10f;
-    private float pullTimer = 0f;
+    private float pullTimer = 5f;
     private bool killingPlayer = false;
     private int timeTilDeath = 60;
 
@@ -75,8 +75,6 @@ public class Projectile : MonoBehaviour
             switch (projectileT)
             {
                 case projectileType.blackhole:
-                    pullRadius = 5f;
-
                     player = GameObject.Find("Player");
                     playerController = player.GetComponent<Controller2D>();
                     playerScript = player.GetComponent<Player>();
@@ -105,7 +103,6 @@ public class Projectile : MonoBehaviour
                     break;
                 case projectileType.blackhole:
                     projectileLifetime = 15f; 
-                    pullRadius = 5f;
 
                     player = GameObject.Find("Player");
                     
@@ -192,51 +189,50 @@ public class Projectile : MonoBehaviour
     }
 
     void doBlackHole()
+{
+    Vector2 playerPosition = player.transform.position;
+    Vector2 blackHolePosition = transform.position;
+    float distance = Vector2.Distance(playerPosition, blackHolePosition);
+
+    // If the player is within range, start pulling
+    if (distance <= pullRadius)
     {
-        Vector2 playerPosition = player.transform.position;
-        Vector2 blackHolePosition = transform.position;
-        float distance = Vector2.Distance(playerPosition, blackHolePosition);
-
-        // If the player is within range, start pulling
-        if (distance <= pullRadius)
+        if (distance <= .5f)
         {
-            if (distance <= .5f) {
-                timeTilDeath--;
-                if (canShrinkPlayer && timeTilDeath/10 % 6 == tick) {
-                    tick--;
-                    Shrink();
-                }
+            timeTilDeath--;
+            if (canShrinkPlayer && timeTilDeath / 10 % 6 == tick)
+            {
+                tick--;
+                Shrink();
             }
-            Vector2 directionToBlackHole = (blackHolePosition - playerPosition).normalized;
-
-            float pullStrength = Mathf.Clamp01(1 - (distance / pullRadius)) * maxPullStrength;
-
-            // Gradually increase pull strength over time (simulate acceleration with timer)
-            pullTimer += Time.deltaTime;
-            float currentPullStrength = Mathf.Min(pullStrength * (pullTimer / pullAccelerationTime), pullStrength);
-
-            ApplyGravitationalPull(directionToBlackHole, currentPullStrength);
         }
-        else
-        {
-            // If the player is out of range, reset the pull timer
-            pullTimer = 0f;
-        }
+        Vector2 directionToBlackHole = (blackHolePosition - playerPosition).normalized;
+
+        float pullStrength = Mathf.Clamp01(1 - (distance / pullRadius)) * maxPullStrength;
+
+        // Gradually increase pull strength over time (simulate acceleration with timer)
+        pullTimer += Time.deltaTime;
+        float currentPullStrength = Mathf.Min(pullStrength * (pullTimer / pullAccelerationTime), pullStrength);
+
+        // Apply the gravitational pull (directly modify the velocity here)
+        ApplyGravitationalPull(directionToBlackHole, currentPullStrength);
     }
+    else
+    {
+        // If the player is out of range, reset the pull timer
+        pullTimer = 0f;
+    }
+}
 
     void ApplyGravitationalPull(Vector2 direction, float strength)
-    {
-        Vector2 currentVelocity = playerScript.getPlayerVelocity();
+{
+    // Calculate the pull velocity directly without considering the player's current velocity
+    Vector2 pullVelocity = direction * strength;
 
-        // Calculate the change in velocity due to the gravitational pull
-        Vector2 pullVelocity = direction * strength;
-
-        // combine velocities to simulate resistance
-        playerScript.updatePlayerVelocity(currentVelocity + pullVelocity);
-
-        // Update the player's movement
-        playerController.Move((currentVelocity + pullVelocity)* Time.deltaTime, Vector2.zero); 
-    }
+    // Update the player's movement by directly applying the calculated pull velocity
+    // The second parameter (Vector2.zero) can be used for other movement input, we ignore it here
+    playerController.Move(pullVelocity * Time.deltaTime, Vector2.zero);
+}
 
     
     void killPlayer()

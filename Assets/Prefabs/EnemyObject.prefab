@@ -10,7 +10,7 @@ GameObject:
   m_Component:
   - component: {fileID: 3477121365709809747}
   - component: {fileID: 6017989311800232056}
-  m_Layer: 0
+  m_Layer: 13
   m_Name: Slime
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -96,7 +96,7 @@ GameObject:
   - component: {fileID: 1269891314374731718}
   - component: {fileID: 1205163984889633092}
   - component: {fileID: 7398148354054650159}
-  m_Layer: 0
+  m_Layer: 13
   m_Name: EnemyObject
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -158,20 +158,20 @@ BoxCollider2D:
   m_Material: {fileID: 6200000, guid: fd9f440412c935a5e8a805258c8aed6d, type: 2}
   m_IncludeLayers:
     serializedVersion: 2
-    m_Bits: 4294967295
+    m_Bits: 8119
   m_ExcludeLayers:
     serializedVersion: 2
-    m_Bits: 0
+    m_Bits: 8192
   m_LayerOverridePriority: 0
   m_ForceSendLayers:
     serializedVersion: 2
-    m_Bits: 4294967295
+    m_Bits: 8119
   m_ForceReceiveLayers:
     serializedVersion: 2
-    m_Bits: 4294967295
+    m_Bits: 8119
   m_ContactCaptureLayers:
     serializedVersion: 2
-    m_Bits: 4294967295
+    m_Bits: 8119
   m_CallbackLayers:
     serializedVersion: 2
     m_Bits: 4294967295
@@ -203,9 +203,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0b712a8ed2b7bbc27bd4683db25060a0, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  movetype: 0
   defaultStateMobileType: 2
   defaultStateCombatType: 1
-  searchType: 0
+  searchType: 1
   enemyViewType: 0
   projectileType: 0
   pAttribute: 1

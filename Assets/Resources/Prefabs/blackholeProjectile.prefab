@@ -174,7 +174,8 @@ MonoBehaviour:
   iScript: {fileID: 0}
   pMobility: 1
   projectileLifetime: 15
-  pullRadius: 3.5
+  pullRadius: 5
+  maxPullStrength: 5
   pullAccelerationTime: 3
   canShrinkPlayer: 0
   playerLayer:
