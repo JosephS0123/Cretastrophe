@@ -16,6 +16,8 @@ public class RedChalkPickUp : MonoBehaviour
         if (collision.tag == "Player")
         {
             AudioSource.PlayClipAtPoint(drawSound, transform.position);
+            //New line here:
+            chalkSelect.SetSelectedChalkIndex(1);
 
             if (chalkUI != null)
             {

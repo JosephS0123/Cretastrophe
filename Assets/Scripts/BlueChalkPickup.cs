@@ -16,6 +16,8 @@ public class NewChalk : MonoBehaviour
         if (collision.tag == "Player")
         {
             AudioSource.PlayClipAtPoint(drawSound, transform.position);
+            //New line here:
+            chalkSelect.SetSelectedChalkIndex(2);
 
             if (chalkUI != null)
             {
