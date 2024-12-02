@@ -27,6 +27,7 @@ public class PickUpBaseChalk : MonoBehaviour
             {
                 drawManagerObj.SetActive(true); //Enables drawing
                 drawManager.canDrawWhite = true; //Enables drawing
+                drawManager.hasWhite = true; //chalk ui test
             }
 
             if (chalkBar != null)

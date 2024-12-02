@@ -20,6 +20,7 @@ public class RedChalkPickUp : MonoBehaviour
             {
                 drawManagerObj.SetActive(true); //Enables drawing
                 chalkUI.SetActive(true);  // Shows the chalk UI
+                drawManager.hasRed = true; //chalk ui test
             }
 
             if (drawManager != null)
