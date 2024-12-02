@@ -8,10 +8,10 @@ public class collectFlag : MonoBehaviour
 
     public AudioClip drawSound; //Sound effect
     public GameObject completeLevel;
-    public GameObject chalkUI;
-    public GameObject barUI;
-    public GameObject FirebarUI;
-    public GameObject IcebarUI;
+    //public GameObject chalkUI;
+    //public GameObject barUI;
+    //public GameObject FirebarUI;
+    //public GameObject IcebarUI;
     public LevelComplete levelCompleteUI;
 
     // Start is called before the first frame update
@@ -56,10 +56,10 @@ public class collectFlag : MonoBehaviour
                 {
                     completeLevel.SetActive(true);  // Shows the UI
                 }
-            chalkUI.SetActive(false);
-            barUI.SetActive(false);
-            FirebarUI.SetActive(false);
-            IcebarUI.SetActive(false);
+           // chalkUI.SetActive(false);
+           // barUI.SetActive(false);
+           // FirebarUI.SetActive(false);
+           // IcebarUI.SetActive(false);
 
         }
         
