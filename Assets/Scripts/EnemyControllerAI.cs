@@ -840,8 +840,10 @@ public class EnemyControllerAI : MonoBehaviour
         /* TODO can be an issue if wrong state */
         if (playerIsInRadius && ((defaultStateMobileType == StateType.immobile && defaultStateCombatType == StateType.combatStill) || (defaultStateCombatType == StateType.combatStill && IsGrounded()))) {
             statetype = defaultStateCombatType;
-            movetype = MoveType.freefall;
-            DoFall();
+            if (defaultStateMobileType == StateType.mobile) {
+                movetype = MoveType.freefall;
+                DoFall();
+            }
         } else {
             statetype = defaultStateMobileType;
         }
@@ -907,9 +909,7 @@ public class EnemyControllerAI : MonoBehaviour
     void updateCombatStill()
     {
         GetPlayerPosition();
-        if (!isTurret) {
-            rb.velocity = Vector3.zero; // ensure no movement while still
-        }
+        rb.velocity = Vector3.zero; // ensure no movement while still
 
         /* update enemy look direction when trying to shoot */
         if (playerPosition.x - transform.position.x > 0 && !isFacingRight){
