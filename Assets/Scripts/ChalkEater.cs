@@ -10,8 +10,10 @@ public class ChalkEater : MonoBehaviour
     public float range = 5f;
     Collider2D _collider;
     public LayerMask chalkLayer;
+    public Vector2 startPos;
     void Start()
     {
+        startPos = transform.position;
         astar = gameObject.GetComponent<AIDestinationSetter>();
         _collider = gameObject.GetComponent<Collider2D>();
     }
@@ -71,5 +73,11 @@ public class ChalkEater : MonoBehaviour
         var guo = new GraphUpdateObject(_collider.bounds);
         guo.updatePhysics = true;
         AstarPath.active.UpdateGraphs(guo);
+    }
+
+    public void Respawn() 
+    {
+        transform.position = startPos;
+        Start();
     }
 }
