@@ -29,7 +29,10 @@ public class MovingObject : MonoBehaviour
     void Update()
     {
         Vector3 velocity = CalculatePlatformMovement();
-        transform.Translate(velocity, Space.World);
+        if(velocity != null)
+        {
+            transform.Translate(velocity, Space.World);
+        }
 
         var guo = new GraphUpdateObject(_collider.bounds);
         guo.updatePhysics = true;
@@ -38,6 +41,7 @@ public class MovingObject : MonoBehaviour
 
     Vector3 CalculatePlatformMovement()
     {
+        if(Time.deltaTime > 0) {
         fromWaypointIndex %= globalWaypoints.Length;
         int toWaypointIndex = (fromWaypointIndex + 1) % globalWaypoints.Length;
         float distanceBetweenWaypoints = Vector3.Distance(globalWaypoints[fromWaypointIndex], globalWaypoints[toWaypointIndex]);
@@ -59,8 +63,15 @@ public class MovingObject : MonoBehaviour
                 }
             }
         }
+        
 
         return newPos - transform.position;
+        }
+        else
+        {
+            return Vector3.zero;
+        }
+
     }
 
     void OnDrawGizmos()
