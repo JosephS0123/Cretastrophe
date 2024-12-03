@@ -332,7 +332,7 @@ public class Projectile : MonoBehaviour
         switch (projectileA) 
         {
             case projectileAttribute.sticky:
-                projectileLifetime = 3.5f;
+                projectileLifetime = 1.5f;
                 break;
             default:
                 break;
@@ -352,10 +352,11 @@ public class Projectile : MonoBehaviour
 
     public void Respawn()
     {
+        if (projectileA == projectileAttribute.sticky) {
+            Destroy(gameObject);
+        }
         transform.position = spawnPos;
         Start();
-        
-
     }
 
 }
