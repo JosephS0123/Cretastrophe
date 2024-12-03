@@ -48,6 +48,9 @@ public class Player : MonoBehaviour
     public AudioClip respawnSound; //Sound effect
     private bool isDead = false;
 
+    //Jump sound here
+    public AudioClip jumpSound; //Sound effect
+
     private void Awake()
     {
         spriteRenderer = GetComponent<SpriteRenderer>();
@@ -110,10 +113,12 @@ public class Player : MonoBehaviour
         
         if (Input.GetKeyDown(KeyCode.Space))
         {
+            
             if (!coyoteCheckPre)
             {
                 if (controller.collisions.below)
                 {
+                    AudioSource.PlayClipAtPoint(jumpSound, transform.position); //jumpfx
                     velocity.y = baseVelocity;
                     jumpTimeElapsed = 0;
                     jumping = true;
@@ -128,6 +133,8 @@ public class Player : MonoBehaviour
             }
             else
             {
+            
+                AudioSource.PlayClipAtPoint(jumpSound, transform.position); //jumpfx
                 velocity.y = baseVelocity;
                 jumpTimeElapsed = 0;
                 jumping = true;
@@ -139,6 +146,7 @@ public class Player : MonoBehaviour
 
         if(Input.GetKey(KeyCode.Space))
         {
+            
             if (jumpTimeElapsed < holdDuration && jumping)
             {
                 velocity.y += curHoldAcceleration * Time.deltaTime;
